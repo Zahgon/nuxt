@@ -13,7 +13,7 @@ const PagePlaceholder = defineComponent({
     if (import.meta.dev) {
       renderDiagnostics.NUXT_E4014({ dir: devPagesDir })
     }
-    return () => props.slots.default?.()
+    return () => { throw new Error("STUB"); }
   },
 }) as unknown as DefineSetupFnComponent<{}, {}, PagePlaceholderSlots>
 

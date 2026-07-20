@@ -18,12 +18,15 @@ export function installClientHead (nuxtApp: NuxtApp, head: ClientHead): void {
     pauseDOMUpdates = false
     head.render()
   }
-  head.hooks?.hook('dom:beforeRender', (context) => { context.shouldRender = !pauseDOMUpdates })
-  nuxtApp.hooks.hook('page:start', () => { pauseDOMUpdates = true })
+  head.hooks?.hook('dom:beforeRender', (context) => {
+      throw new Error("STUB");
+  })
+  nuxtApp.hooks.hook('page:start', () => {
+      throw new Error("STUB");
+  })
   // wait for new page before unpausing dom updates (triggered after suspense resolved)
   nuxtApp.hooks.hook('page:finish', () => {
-    // app:suspense:resolve hook will unpause the DOM
-    if (!nuxtApp.isHydrating) { syncHead() }
+      throw new Error("STUB");
   })
   // unpause on error
   nuxtApp.hooks.hook('app:error', syncHead)
@@ -33,16 +36,6 @@ export function installClientHead (nuxtApp: NuxtApp, head: ClientHead): void {
   // Defer head-entry disposal during a page transition.
   const originalPush = head.push.bind(head)
   head.push = ((input: Parameters<typeof head.push>[0], options?: Parameters<typeof head.push>[1]) => {
-    const entry = originalPush(input, options) as ActiveHeadEntry<typeof input>
-    const originalDispose = entry.dispose.bind(entry)
-    entry.dispose = () => {
-      const transitionPromise = nuxtApp['~transitionPromise']
-      if (transitionPromise) {
-        transitionPromise.finally(originalDispose)
-      } else {
-        originalDispose()
-      }
-    }
-    return entry
+      throw new Error("STUB");
   }) as typeof head.push
 }

@@ -62,21 +62,12 @@ export const _showErrorUnlessCrawler = async (nuxtApp: NuxtApp, error: Error): P
     await _notifyCrawlerError(nuxtApp, error)
     return
   }
-  await nuxtApp.runWithContext(() => showError(error))
+  await nuxtApp.runWithContext(() => { throw new Error("STUB"); })
 }
 
 /** @since 3.0.0 */
 export const clearError = async (options: { redirect?: string } = {}): Promise<void> => {
-  const nuxtApp = useNuxtApp()
-  const error = useError()
-
-  nuxtApp.callHook('app:error:cleared', options)
-
-  if (options.redirect) {
-    await useRouter().replace(options.redirect)
-  }
-
-  error.value = undefined
+    throw new Error("STUB");
 }
 
 /** @since 3.0.0 */

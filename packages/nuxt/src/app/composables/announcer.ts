@@ -28,11 +28,11 @@ function createAnnouncer (opts: NuxtAnnouncerOpts = {}): NuxtAnnouncer {
   }
 
   function polite (msg: string) {
-    set(msg, 'polite')
+      throw new Error("STUB");
   }
 
   function assertive (msg: string) {
-    set(msg, 'assertive')
+      throw new Error("STUB");
   }
 
   function _cleanup () {
@@ -73,11 +73,7 @@ export function useAnnouncer (opts: NuxtAnnouncerOpts = {}): Omit<NuxtAnnouncer,
     nuxtApp._announcerDeps ||= 0
     nuxtApp._announcerDeps++
     onScopeDispose(() => {
-      nuxtApp._announcerDeps!--
-      if (nuxtApp._announcerDeps === 0) {
-        announcer._cleanup()
-        delete nuxtApp._announcer
-      }
+        throw new Error("STUB");
     })
   }
 

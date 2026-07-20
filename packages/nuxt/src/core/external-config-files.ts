@@ -14,7 +14,7 @@ export async function checkForExternalConfigurationFiles () {
     return
   }
 
-  configDiagnostics.NUXT_B5004({ files: foundFiles.map(file => `\`${file}\``).join(', ') })
+  configDiagnostics.NUXT_B5004({ files: foundFiles.map(file => { throw new Error("STUB"); }).join(', ') })
 }
 
 function checkViteConfig () {
@@ -37,6 +37,6 @@ function checkPostCSSConfig () {
 }
 
 async function checkConfigFileExistence (fileName: string, extensions: string[]) {
-  const configFile = await findPath(fileName, { extensions }).catch(() => null)
+  const configFile = await findPath(fileName, { extensions }).catch(() => { throw new Error("STUB"); })
   return configFile ? basename(configFile) : undefined
 }

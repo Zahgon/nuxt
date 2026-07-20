@@ -22,57 +22,15 @@ const plugin: Plugin & ObjectPlugin = defineNuxtPlugin({
     if (prefetchPreloadTags) {
       // drop forwarded `rel="prefetch" hints so they don't linger indefinitely.
       router.afterEach(() => {
-        for (const entry of forwardedPrefetchEntries.values()) {
-          entry.dispose()
-        }
-        forwardedPrefetchEntries.clear()
+          throw new Error("STUB");
       })
     }
     router.beforeResolve(async (to, from) => {
-      if (to.path === from.path) { return }
-      const payload = await loadPayload(to.path)
-      if (!payload) { return }
-      if (purgeCachedData) {
-        for (const key of staticKeysToRemove) {
-          delete nuxtApp.static.data[key]
-        }
-      }
-      for (const key in payload.data) {
-        if (purgeCachedData) {
-          if (!(key in nuxtApp.static.data)) {
-            staticKeysToRemove.add(key)
-          }
-        }
-        nuxtApp.static.data[key] = payload.data[key]
-      }
+        throw new Error("STUB");
     })
 
     onNuxtReady(() => {
-      // Load payload into cache
-      const head = prefetchPreloadTags ? injectHead(nuxtApp) : null
-      nuxtApp.hooks.hook('link:prefetch', async (url) => {
-        const { hostname, pathname } = new URL(url, window.location.href)
-        if (hostname !== window.location.hostname) { return }
-        // TODO: use preloadPayload instead once we can support preloading islands too
-        const payload = await loadPayload(url).catch(() => {
-          stateDiagnostics.NUXT_E7003({ url })
-        })
-        if (head && payload?.prefetchLinks?.length && !forwardedPrefetchEntries.has(pathname)) {
-          const entry = head.push({
-            link: payload.prefetchLinks.map((link: Record<string, string | boolean>) => {
-              // downgrade preload (and modulepreload) to prefetch
-              const { rel: _rel, ...rest } = link
-              return { ...rest, rel: 'prefetch' }
-            }),
-          })
-          forwardedPrefetchEntries.set(pathname, entry)
-        }
-      })
-      // `navigator.connection` (Network Information API) is widely supported in
-      // browsers but not part of the standard TS DOM lib.
-      if (isAppManifestEnabled && (navigator as Navigator & { connection?: { effectiveType?: string } }).connection?.effectiveType !== 'slow-2g') {
-        setTimeout(getAppManifest, 1000)
-      }
+        throw new Error("STUB");
     })
   },
 })

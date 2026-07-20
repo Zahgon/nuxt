@@ -12,11 +12,11 @@ export const navigationDiagnostics = !import.meta.dev
       reporters,
       codes: {
         NUXT_E2001: {
-          why: (p: { toPath: string }) => `Navigating to external URL \`${p.toPath}\` is not allowed by default.`,
-          fix: (p: { toPath: string }) => `Use \`navigateTo('${p.toPath}', { external: true })\` to allow external navigation.`,
+          why: (p: { toPath: string }) => { throw new Error("STUB"); },
+          fix: (p: { toPath: string }) => { throw new Error("STUB"); },
         },
         NUXT_E2002: {
-          why: (p: { toPath: string, protocol: string }) => `Cannot navigate to URL \`${p.toPath}\` with \`${p.protocol}\` protocol.`,
+          why: (p: { toPath: string, protocol: string }) => { throw new Error("STUB"); },
           fix: 'Script protocols (e.g. `javascript:`) are blocked for security. Use a valid `http:` or `https:` URL.',
         },
         NUXT_E2003: {
@@ -24,11 +24,11 @@ export const navigationDiagnostics = !import.meta.dev
           fix: 'Move this call inside a route middleware defined with `defineNuxtRouteMiddleware()` or `addRouteMiddleware()`.',
         },
         NUXT_E2004: {
-          why: (p: { entry: string }) => `Unknown route middleware: '${p.entry}'.`,
-          fix: (p: { entry: string, validMiddleware?: string[] }) => `Create a \`middleware/${p.entry}.ts\` file, or check the middleware name for typos.${p.validMiddleware?.length ? ` Valid middleware: ${p.validMiddleware.map(mw => `'${mw}'`).join(', ')}.` : ''}`,
+          why: (p: { entry: string }) => { throw new Error("STUB"); },
+          fix: (p: { entry: string, validMiddleware?: string[] }) => { throw new Error("STUB"); },
         },
         NUXT_E2005: {
-          why: (p: { middleware?: string, trace: string }) => `\`useRoute\` was called within middleware${p.middleware ? ` (\`${p.middleware}\`)` : ''}. This may lead to misleading results.\n${p.trace}`,
+          why: (p: { middleware?: string, trace: string }) => { throw new Error("STUB"); },
           fix: 'Use the `to` and `from` arguments passed to the middleware function instead of `useRoute()`.',
         },
         NUXT_E2006: {
@@ -51,12 +51,12 @@ export const navigationDiagnostics = !import.meta.dev
           docs: false,
         },
         NUXT_E2010: {
-          why: (p: { path: string }) => `\`reloadNuxtApp\` cannot navigate to \`${p.path}\` because it is on a different host.`,
+          why: (p: { path: string }) => { throw new Error("STUB"); },
           fix: 'Pass a path on the same host, or use `navigateTo(path, { external: true })` for cross-origin navigation.',
           docs: false,
         },
         NUXT_E2011: {
-          why: (p: { componentName: string }) => `\`<${p.componentName}>\` refused to navigate to a URL with a script-capable protocol.`,
+          why: (p: { componentName: string }) => { throw new Error("STUB"); },
           fix: 'Script protocols (e.g. `javascript:`) are blocked for security. Use a valid `http:` or `https:` URL.',
           docs: false,
         },

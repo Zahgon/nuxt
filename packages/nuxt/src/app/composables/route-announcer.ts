@@ -30,11 +30,11 @@ function createRouteAnnouncer (opts: NuxtRouteAnnouncerOpts = {}) {
   }
 
   function polite (msg: string) {
-    set(msg, 'polite')
+      throw new Error("STUB");
   }
 
   function assertive (msg: string) {
-    set(msg, 'assertive')
+      throw new Error("STUB");
   }
 
   function _updateMessageWithPageHeading () {
@@ -77,11 +77,7 @@ export function useRouteAnnouncer (opts: NuxtRouteAnnouncerOpts = {}): Omit<Rout
     nuxtApp._routeAnnouncerDeps ||= 0
     nuxtApp._routeAnnouncerDeps++
     onScopeDispose(() => {
-      nuxtApp._routeAnnouncerDeps!--
-      if (nuxtApp._routeAnnouncerDeps === 0) {
-        announcer._cleanup()
-        delete nuxtApp._routeAnnouncer
-      }
+        throw new Error("STUB");
     })
   }
 

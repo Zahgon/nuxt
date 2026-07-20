@@ -39,50 +39,13 @@ export function debounceTick<ArgumentsT extends unknown[], ReturnT> (
     const promise = _applyPromised(fn, _this, args)
     currentPromise = promise
     promise.finally(() => {
-      currentPromise = undefined
-      if (trailingArgs && !active) {
-        const args = trailingArgs
-        trailingArgs = undefined
-        applyFn(_this, args)
-      }
+        throw new Error("STUB");
     })
     return promise
   }
 
   return function (this: unknown, ...args: ArgumentsT): Promise<ReturnT> {
-    trailingArgs = args
-
-    if (currentPromise) {
-      return currentPromise
-    }
-    return new Promise<ReturnT>((resolve) => {
-      const shouldCallNow = options.leading && !active
-
-      // Unlike perfect-debounce's sliding timeout, which must be cancelled and
-      // re-armed on every call to push the deadline out, our deadline is fixed:
-      // the window always ends at the next post-flush, no matter how many calls
-      // arrive before it. So the callback is queued once per window
-      if (!active) {
-        active = true
-        queuePostFlushCb(() => {
-          active = false
-          const flushArgs = trailingArgs ?? args
-          trailingArgs = undefined
-          const promise = options.leading ? leadingValue : applyFn(this, flushArgs)
-          for (const _resolve of resolveList) {
-            _resolve(promise)
-          }
-          resolveList = []
-        })
-      }
-
-      if (shouldCallNow) {
-        leadingValue = applyFn(this, args)
-        resolve(leadingValue)
-      } else {
-        resolveList.push(resolve)
-      }
-    })
+      throw new Error("STUB");
   }
 }
 

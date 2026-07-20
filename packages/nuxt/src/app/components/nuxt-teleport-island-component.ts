@@ -37,26 +37,13 @@ const NuxtTeleportIslandComponent = /* @__PURE__ */ defineComponent({
     const to = useId()
 
     // if there's already a teleport parent, we don't need to teleport or to render the wrapped component client side
-    if (!nuxtApp.ssrContext?.islandContext || !props.nuxtClient || inject(NuxtTeleportIslandSymbol, false)) { return () => slots.default?.() }
+    if (!nuxtApp.ssrContext?.islandContext || !props.nuxtClient || inject(NuxtTeleportIslandSymbol, false)) { return () => { throw new Error("STUB"); } }
 
     provide(NuxtTeleportIslandSymbol, to)
     const islandContext = nuxtApp.ssrContext!.islandContext!
 
     return () => {
-      const slot = slots.default!()[0]!
-      const slotType = slot.type as ExtendedComponent
-      const name = (slotType.__name || slotType.name) as string
-
-      islandContext.components[to] = {
-        chunk: import.meta.dev ? buildAssetsURL(paths[name]) : paths[name],
-        props: slot.props || {},
-      }
-
-      return [h('div', {
-        'style': 'display: contents;',
-        'data-island-uid': '',
-        'data-island-component': to,
-      }, []), h(Teleport, { to }, slot)]
+        throw new Error("STUB");
     }
   },
 }) as unknown as DefineSetupFnComponent<NuxtTeleportIslandComponentProps, {}, NuxtTeleportIslandComponentSlots>

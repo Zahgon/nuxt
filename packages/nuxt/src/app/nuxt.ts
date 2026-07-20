@@ -245,7 +245,9 @@ export function createNuxtApp (options: CreateOptions): NuxtApp {
     _scope: effectScope(),
     provide: undefined,
     versions: {
-      get nuxt () { return __NUXT_VERSION__ },
+      get nuxt () {
+            throw new Error("STUB");
+        },
       get vue () { return nuxtApp.vueApp.version },
     },
     payload: shallowReactive({
@@ -260,27 +262,21 @@ export function createNuxtApp (options: CreateOptions): NuxtApp {
     },
     runWithContext <T>(fn: () => T) {
       if (nuxtApp._scope.active && !getCurrentScope()) {
-        return nuxtApp._scope.run(() => callWithNuxt(nuxtApp, fn))
+        return nuxtApp._scope.run(() => { throw new Error("STUB"); })
       }
       return callWithNuxt(nuxtApp, fn)
     },
     isHydrating: import.meta.client,
     deferHydration () {
-      if (!nuxtApp.isHydrating) { return () => {} }
+      if (!nuxtApp.isHydrating) { return () => {
+          throw new Error("STUB");
+      } }
 
       hydratingCount++
       let called = false
 
       return () => {
-        if (called) { return }
-
-        called = true
-        hydratingCount--
-
-        if (hydratingCount === 0) {
-          nuxtApp.isHydrating = false
-          return nuxtApp.callHook('app:suspense:resolve')
-        }
+          throw new Error("STUB");
       }
     },
     _asyncDataPromises: {},
@@ -333,24 +329,20 @@ export function createNuxtApp (options: CreateOptions): NuxtApp {
 
   if (import.meta.server) {
     const contextCaller = async function (hooks: HookCallback[], args: any[]) {
-      for (const hook of hooks) {
-        await nuxtApp.runWithContext(() => hook(...args))
-      }
+        throw new Error("STUB");
     }
     // Patch callHook to preserve NuxtApp context on server
     // TODO: Refactor after https://github.com/unjs/hookable/issues/74
-    nuxtApp.hooks.callHook = (name: any, ...args: any[]) => nuxtApp.hooks.callHookWith(contextCaller, name, args)
+    nuxtApp.hooks.callHook = (name: any, ...args: any[]) => { throw new Error("STUB"); }
   } else if (asyncCallHook) {
     const _callHook = nuxtApp.hooks.callHook
-    nuxtApp.hooks.callHook = (name: any, ...args: any[]) => Promise.resolve().then(() => _callHook(name, ...args))
+    nuxtApp.hooks.callHook = (name: any, ...args: any[]) => { throw new Error("STUB"); }
   }
 
   nuxtApp.callHook = nuxtApp.hooks.callHook
 
   nuxtApp.provide = (name: string, value: any) => {
-    const $name = '$' + name
-    defineGetter(nuxtApp, $name, value)
-    defineGetter(nuxtApp.vueApp.config.globalProperties, $name, value)
+      throw new Error("STUB");
   }
 
   // Inject $nuxt
@@ -361,10 +353,7 @@ export function createNuxtApp (options: CreateOptions): NuxtApp {
     // Listen to chunk load errors
     if (chunkErrorEvent) {
       window.addEventListener(chunkErrorEvent, (event) => {
-        nuxtApp.callHook('app:chunkError', { error: (event as Event & { payload: Error }).payload })
-        if (event.payload?.message?.includes('Unable to preload CSS')) {
-          event.preventDefault()
-        }
+          throw new Error("STUB");
       })
     }
     window.useNuxtApp ||= useNuxtApp
@@ -372,7 +361,7 @@ export function createNuxtApp (options: CreateOptions): NuxtApp {
     // Log errors captured when running plugins, in the `app:created` and `app:beforeMount` hooks
     // as well as when mounting the app.
     const unreg = nuxtApp.hook('app:error', (...args) => {
-      appDiagnostics.NUXT_E1005({ cause: args.length > 1 ? args : args[0] })
+        throw new Error("STUB");
     })
     nuxtApp.hook('app:mounted', unreg)
   }
@@ -394,7 +383,7 @@ export function registerPluginHooks (nuxtApp: NuxtApp, plugin: Plugin & ObjectPl
 /** @since 3.0.0 */
 export async function applyPlugin (nuxtApp: NuxtApp, plugin: Plugin & ObjectPlugin<any>): Promise<void> {
   if (typeof plugin === 'function') {
-    const run = () => nuxtApp.runWithContext(() => plugin(nuxtApp))
+    const run = () => nuxtApp.runWithContext(() => { throw new Error("STUB"); })
     const { provide } = await (import.meta.server && tracingChannelNuxt
       ? traceAsync(
           'nuxt.plugin',
@@ -449,29 +438,14 @@ async function applyPluginsWithDependencies (nuxtApp: NuxtApp, plugins: Array<Pl
   let promiseDepth = 0
 
   async function executePlugin (plugin: Plugin & ObjectPlugin<any>) {
-    const unresolvedPluginsForThisPlugin = plugin.dependsOn?.filter(name => plugins.some(p => p._name === name) && !resolvedPlugins.has(name)) ?? []
+    const unresolvedPluginsForThisPlugin = plugin.dependsOn?.filter(name => { throw new Error("STUB"); }) ?? []
     if (unresolvedPluginsForThisPlugin.length > 0) {
       unresolvedPlugins.push([new Set(unresolvedPluginsForThisPlugin), plugin])
     } else {
       const promise = applyPlugin(nuxtApp, plugin).then(async () => {
-        if (plugin._name) {
-          resolvedPlugins.add(plugin._name)
-          await Promise.all(unresolvedPlugins.map(async ([dependsOn, unexecutedPlugin]) => {
-            if (dependsOn.has(plugin._name!)) {
-              dependsOn.delete(plugin._name!)
-              if (dependsOn.size === 0) {
-                promiseDepth++
-                await executePlugin(unexecutedPlugin)
-              }
-            }
-          }))
-        }
+          throw new Error("STUB");
       }).catch((e) => {
-        // short circuit if we are not rendering `error.vue`
-        if (!plugin.parallel && !nuxtApp.payload.error) {
-          throw e
-        }
-        error ||= e
+          throw new Error("STUB");
       })
 
       if (plugin.parallel) {
@@ -513,7 +487,9 @@ export function defineNuxtPlugin<T extends Record<string, unknown>> (plugin: Plu
 
   const _name = plugin._name || plugin.name
   delete plugin.name
-  return Object.assign(plugin.setup || (() => {}), plugin, { [NuxtPluginIndicator]: true, _name } as const)
+  return Object.assign(plugin.setup || (() => {
+      throw new Error("STUB");
+  }), plugin, { [NuxtPluginIndicator]: true, _name } as const)
 }
 
 /* @__NO_SIDE_EFFECTS__ */
@@ -521,7 +497,7 @@ export const definePayloadPlugin: typeof defineNuxtPlugin = defineNuxtPlugin
 
 /** @since 3.0.0 */
 export function isNuxtPlugin (plugin: unknown): plugin is Plugin {
-  return typeof plugin === 'function' && NuxtPluginIndicator in plugin
+    throw new Error("STUB");
 }
 
 /**
@@ -534,7 +510,7 @@ export function callWithNuxt<T extends (...args: any[]) => any> (nuxt: NuxtApp |
   const fn: () => ReturnType<T> = () => args ? setup(...args as Parameters<T>) : setup()
   const nuxtAppCtx = getNuxtAppCtx(nuxt._id)
   if (import.meta.server) {
-    return nuxt.vueApp.runWithContext(() => nuxtAppCtx.callAsync(nuxt as NuxtApp, fn))
+    return nuxt.vueApp.runWithContext(() => { throw new Error("STUB"); })
   } else {
     // In client side we could assume nuxt app is singleton
     nuxtAppCtx.set(nuxt as NuxtApp)
@@ -587,12 +563,12 @@ export function useRuntimeConfig (): RuntimeConfig {
 }
 
 function defineGetter<K extends string | number | symbol, V> (obj: Record<K, V>, key: K, val: V) {
-  Object.defineProperty(obj, key, { get: () => val })
+  Object.defineProperty(obj, key, { get: () => { throw new Error("STUB"); } })
 }
 
 /** @since 3.0.0 */
 export function defineAppConfig<C extends AppConfigInput> (config: C): C {
-  return config
+    throw new Error("STUB");
 }
 
 /**

@@ -13,9 +13,5 @@ export function useRuntimeHook<THookName extends keyof RuntimeNuxtHooks> (
   name: THookName,
   fn: RuntimeNuxtHooks[THookName] extends HookCallback ? RuntimeNuxtHooks[THookName] : never,
 ): void {
-  const nuxtApp = useNuxtApp()
-
-  const unregister = nuxtApp.hook(name, fn)
-
-  onScopeDispose(unregister)
+    throw new Error("STUB");
 }

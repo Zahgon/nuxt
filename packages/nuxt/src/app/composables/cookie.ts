@@ -66,21 +66,9 @@ export interface CookieRef<T> extends Ref<T> {}
 const CookieDefaults = {
   path: '/',
   watch: true,
-  decode: val => val ? parseCookieValue(decodeURIComponent(val)) : val,
+  decode: val => { throw new Error("STUB"); },
   encode: (val) => {
-    // JSON-quote strings that would be coerced on decode (e.g. '42', 'true', 'null', 'undefined')
-    if (typeof val !== 'string' || val === 'undefined') {
-      return encodeURIComponent(JSON.stringify(val))
-    }
-
-    try {
-      if (typeof JSON.parse(val) !== 'string') {
-        return encodeURIComponent(JSON.stringify(val))
-      }
-    } catch {
-      // ignore - value is not JSON, so encode as-is
-    }
-    return encodeURIComponent(val)
+      throw new Error("STUB");
   },
   refresh: false,
 } satisfies CookieOptions<any>
@@ -92,183 +80,19 @@ const store = import.meta.client && cookieStore ? globalThis.cookieStore : undef
 export function useCookie<T = string | null | undefined> (name: string, _opts?: CookieOptions<T> & { readonly?: false }): CookieRef<T>
 export function useCookie<T = string | null | undefined> (name: string, _opts: CookieOptions<T> & { readonly: true }): Readonly<CookieRef<T>>
 export function useCookie<T = string | null | undefined> (name: string, _opts?: CookieOptions<T>): CookieRef<T> {
-  const opts = { ...CookieDefaults, ..._opts }
-  opts.filter ??= key => key === name
-  const cookies = readRawCookies(opts) || {}
-
-  let delay: number | undefined
-
-  if (opts.maxAge !== undefined) {
-    delay = opts.maxAge * 1000 // convert to ms for setTimeout
-  } else if (opts.expires) {
-    const expires = resolveExpires(opts.expires)
-    if (expires) {
-      // getTime() already returns time in ms
-      delay = expires.getTime() - Date.now()
-    }
-  }
-
-  const getDelay = () => {
-    if (opts.maxAge !== undefined) { return opts.maxAge * 1000 }
-    if (!opts.expires) { return undefined }
-    const expires = resolveExpires(opts.expires)
-    return expires ? expires.getTime() - Date.now() : undefined
-  }
-
-  const hasExpired = delay !== undefined && delay <= 0
-  const shouldSetInitialClientCookie = import.meta.client && (hasExpired || cookies[name] === undefined || cookies[name] === null)
-  const cookieValue = klona(hasExpired ? undefined : (cookies[name] as any) ?? opts.default?.())
-
-  // use a custom ref to expire the cookie on client side otherwise use a plain ref (or cookieServerRef on the server to track writes for the `refresh` option)
-  const cookie = import.meta.client && (typeof opts.expires === 'function' || (delay && !hasExpired))
-    ? cookieRef<T | undefined>(cookieValue, delay, getDelay, opts.watch && opts.watch !== 'shallow')
-    : import.meta.server
-      ? cookieServerRef<T | undefined>(name, cookieValue)
-      : ref<T | undefined>(cookieValue)
-
-  if (import.meta.dev && hasExpired) {
-    stateDiagnostics.NUXT_E7005({ name })
-  }
-
-  if (import.meta.client) {
-    let channel: null | BroadcastChannel = null
-    try {
-      if (!store && typeof BroadcastChannel !== 'undefined') {
-        channel = new BroadcastChannel(`nuxt:cookies:${name}`)
-      }
-    } catch {
-      // BroadcastChannel will fail in certain situations when cookies are disabled
-      // or running in an iframe: see https://github.com/nuxt/nuxt/issues/26338
-    }
-    const callback = (force = false) => {
-      if (!force) {
-        if (opts.readonly || isEqual(cookie.value, cookies[name])) { return }
-      }
-      const encoded = cookie.value === null || cookie.value === undefined
-        ? undefined
-        : opts.encode(cookie.value as T)
-      writeClientCookie(name, encoded, opts)
-
-      cookies[name] = klona(cookie.value)
-      channel?.postMessage({ value: opts.encode(cookie.value as T) })
-    }
-
-    const handleChange = (data: { value?: string | null, refresh?: boolean }) => {
-      const value = data.refresh ? readRawCookies(opts)?.[name] : opts.decode(data.value)
-      watchPaused = true
-      cookie.value = value
-      cookies[name] = klona(value)
-      nextTick(() => { watchPaused = false })
-    }
-
-    let watchPaused = false
-
-    const hasScope = !!getCurrentScope()
-
-    if (hasScope) {
-      onScopeDispose(() => {
-        watchPaused = true
-        callback()
-        channel?.close()
-      })
-    }
-
-    if (store) {
-      /* event is of type CookieChangeEvent */
-      const changeHandler = (event: CookieChangeEvent) => {
-        const changedCookie = event.changed.find(c => c.name === name)
-        const removedCookie = event.deleted.find(c => c.name === name)
-
-        if (changedCookie) {
-          handleChange({ value: changedCookie.value })
-        }
-
-        if (removedCookie) {
-          handleChange({ value: null })
-        }
-      }
-      store.addEventListener('change', changeHandler)
-      if (hasScope) {
-        onScopeDispose(() => store.removeEventListener('change', changeHandler))
-      }
-    } else if (channel) {
-      channel.onmessage = ({ data }) => handleChange(data)
-    }
-
-    if (opts.watch) {
-      watch(cookie, () => {
-        if (watchPaused) { return }
-        callback(opts.refresh)
-      },
-      { deep: opts.watch !== 'shallow' })
-    }
-
-    if (shouldSetInitialClientCookie) {
-      callback(shouldSetInitialClientCookie)
-    }
-  } else if (import.meta.server) {
-    const nuxtApp = useNuxtApp()
-    const writeFinalCookieValue = () => {
-      const valueIsSame = isEqual(cookie.value, cookies[name])
-
-      if (
-        opts.readonly
-        || (valueIsSame && !opts.refresh)
-      ) { return }
-
-      nuxtApp._cookiesChanged ||= {}
-      if (valueIsSame && opts.refresh && !nuxtApp._cookiesChanged[name]) {
-        return
-      }
-
-      nuxtApp._cookies ||= {}
-      if (name in nuxtApp._cookies) {
-        // do not append a second `set-cookie` header
-        if (isEqual(cookie.value, nuxtApp._cookies[name])) { return }
-        // warn in dev mode
-        if (import.meta.dev) {
-          stateDiagnostics.NUXT_E7006({ name, previous: opts.encode(nuxtApp._cookies[name] as any), next: opts.encode(cookie.value as any) })
-        }
-      }
-      nuxtApp._cookies[name] = cookie.value
-      const encoded = cookie.value === null || cookie.value === undefined
-        ? undefined
-        : opts.encode(cookie.value as T)
-      writeServerCookie(useRequestEvent(nuxtApp)!, name, encoded, opts)
-    }
-    const unhook = nuxtApp.hooks.hookOnce('app:rendered', writeFinalCookieValue)
-    nuxtApp.hooks.hookOnce('app:error', () => {
-      unhook() // don't write cookie subsequently when app:rendered is called
-      return writeFinalCookieValue()
-    })
-  }
-
-  return cookie as CookieRef<T>
+    throw new Error("STUB");
 }
 /** @since 3.10.0 */
 export function refreshCookie (name: string): void {
-  if (import.meta.server || store || typeof BroadcastChannel === 'undefined') { return }
-
-  try {
-    const channel = new BroadcastChannel(`nuxt:cookies:${name}`)
-    channel.postMessage({ refresh: true })
-    channel.close()
-  } catch {
-    // BroadcastChannel will fail in certain situations when cookies are disabled
-    // or running in an iframe: see https://github.com/nuxt/nuxt/issues/26338
-  }
+    throw new Error("STUB");
 }
 
 function readRawCookies (opts: CookieOptions = {}): Record<string, unknown> | undefined {
-  if (import.meta.server) {
-    return parse(useRequestEvent()!.req.headers.get('cookie') || '', opts)
-  } else if (import.meta.client) {
-    return parse(document.cookie, opts)
-  }
+    throw new Error("STUB");
 }
 
 // value is expected to be already encoded via `opts.encode`; pass through as-is
-const identityEncode = (val: string) => val
+const identityEncode = (val: string) => { throw new Error("STUB"); }
 
 function toSerializeOptions (opts: CookieOptions): CookieSerializeOptions {
   const { encode: _encode, decode: _decode, expires, ...rest } = opts
@@ -294,20 +118,7 @@ function writeClientCookie (name: string, value: string | undefined, opts: Cooki
 }
 
 function writeServerCookie (event: H3Event, name: string, value: string | undefined, opts: CookieOptions = {}) {
-  if (event) {
-    const serializeOpts = toSerializeOptions(opts)
-    // update if value is set
-    if (value !== undefined) {
-      return setCookie(event, name, value, serializeOpts)
-    }
-
-    // delete if cookie exists in browser and value is null/undefined
-    if (getCookie(event, name) !== undefined) {
-      return deleteCookie(event, name, serializeOpts)
-    }
-
-    // else ignore if cookie doesn't exist in browser and value is null/undefined
-  }
+    throw new Error("STUB");
 }
 
 /**
@@ -319,55 +130,7 @@ const MAX_TIMEOUT_DELAY = 2_147_483_647
 
 // custom ref that will update the value to undefined if the cookie expires
 function cookieRef<T> (value: T | undefined, initialDelay: number | undefined, getDelay: () => number | undefined, shouldWatch: boolean) {
-  let timeout: NodeJS.Timeout
-  let unsubscribe: (() => void) | undefined
-  let elapsed = 0
-  let delay = initialDelay
-  const internalRef = shouldWatch ? ref(value) : { value }
-  if (getCurrentScope()) {
-    onScopeDispose(() => {
-      unsubscribe?.()
-      clearTimeout(timeout)
-    })
-  }
-
-  return customRef((track, trigger) => {
-    if (shouldWatch) { unsubscribe = watch(internalRef, trigger) }
-
-    function scheduleTimeout () {
-      const currentDelay = delay
-      if (currentDelay === undefined) { return }
-      const timeRemaining = currentDelay - elapsed
-      const timeoutLength = timeRemaining < MAX_TIMEOUT_DELAY ? timeRemaining : MAX_TIMEOUT_DELAY
-      timeout = setTimeout(() => {
-        elapsed += timeoutLength
-        if (elapsed < currentDelay) { return scheduleTimeout() }
-
-        internalRef.value = undefined
-        trigger()
-      }, timeoutLength)
-    }
-
-    function createExpirationTimeout () {
-      elapsed = 0
-      delay = getDelay()
-      clearTimeout(timeout)
-      scheduleTimeout()
-    }
-
-    return {
-      get () {
-        track()
-        return internalRef.value
-      },
-      set (newValue) {
-        createExpirationTimeout()
-
-        internalRef.value = newValue
-        trigger()
-      },
-    }
-  })
+    throw new Error("STUB");
 }
 
 /**
@@ -377,22 +140,5 @@ function cookieRef<T> (value: T | undefined, initialDelay: number | undefined, g
  * re-written on SSR even when the value remains unchanged.
  */
 function cookieServerRef<T> (name: string, value: T | undefined) {
-  const internalRef = ref(value)
-  const nuxtApp = useNuxtApp()
-
-  return customRef((track, trigger) => {
-    return {
-      get () {
-        track()
-        return internalRef.value
-      },
-      set (newValue) {
-        nuxtApp._cookiesChanged ||= {}
-        nuxtApp._cookiesChanged[name] = true
-
-        internalRef.value = newValue
-        trigger()
-      },
-    }
-  })
+    throw new Error("STUB");
 }

@@ -1,6 +1,8 @@
 export * from 'vue'
 
-export const install = (): void => {}
+export const install = (): void => {
+    throw new Error("STUB");
+}
 
 export function set<T> (target: any, key: string | number | symbol, val: T): T {
   if (Array.isArray(target)) {
@@ -13,9 +15,5 @@ export function set<T> (target: any, key: string | number | symbol, val: T): T {
 }
 
 export function del (target: any, key: string | number | symbol): void {
-  if (Array.isArray(target)) {
-    target.splice(key as number, 1)
-    return
-  }
-  delete target[key]
+    throw new Error("STUB");
 }

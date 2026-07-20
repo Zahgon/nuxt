@@ -9,9 +9,9 @@ function renderStubMessage (name: string): never {
 }
 
 export const NuxtImg: { setup: () => never } = {
-  setup: (): never => renderStubMessage('<NuxtImg>'),
+  setup: (): never => { throw new Error("STUB"); },
 }
 
 export const NuxtPicture: { setup: () => never } = {
-  setup: (): never => renderStubMessage('<NuxtPicture>'),
+  setup: (): never => { throw new Error("STUB"); },
 }

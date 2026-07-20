@@ -23,31 +23,17 @@ export function useRequestEvent (nuxtApp?: NuxtApp): H3Event | undefined {
 export function useRequestHeaders<K extends string = string> (include: K[]): { [key in Lowercase<K>]?: string }
 export function useRequestHeaders (): Readonly<Record<string, string>>
 export function useRequestHeaders (include?: any[]): Readonly<Record<string, string>> {
-  if (import.meta.client) { return {} }
-  const event = useRequestEvent()
-  const _headers = event ? Object.fromEntries(event.req.headers.entries()) : {}
-  if (!include || !event) { return _headers }
-  const headers = Object.create(null)
-  for (const _key of include) {
-    const key = _key.toLowerCase()
-    const header = _headers[key]
-    if (header) {
-      headers[key] = header
-    }
-  }
-  return headers
+    throw new Error("STUB");
 }
 
 /** @since 3.9.0 */
 export function useRequestHeader (header: string): string | null | undefined {
-  if (import.meta.client) { return undefined }
-  const event = useRequestEvent()
-  return event ? event.req.headers.get(header) : undefined
+    throw new Error("STUB");
 }
 
 /** @since 3.2.0 */
 export function useRequestFetch (): $Fetch {
-  return $fetch as $Fetch
+    throw new Error("STUB");
 }
 
 /** @since 3.0.0 */
@@ -55,45 +41,12 @@ export function setResponseStatus (event: H3Event, code?: number, message?: stri
 /** @deprecated Pass `event` as first option. */
 export function setResponseStatus (code: number, message?: string): void
 export function setResponseStatus (arg1: H3Event | number | undefined, arg2?: number | string, arg3?: string): void {
-  if (import.meta.client) { return }
-  if (arg1 && typeof arg1 !== 'number') {
-    arg1.res.status = arg2 as number | undefined
-    arg1.res.statusText = arg3
-    return
-  }
-  const event = useRequestEvent()
-  if (event) {
-    event.res.status = arg1 as number
-    event.res.statusText = arg2 as string | undefined
-  }
+    throw new Error("STUB");
 }
 
 /** @since 3.14.0 */
 export function useResponseHeader (header: string): import('vue').WritableComputedRef<string | null | undefined> | import('vue').Ref<string | null | undefined> {
-  if (import.meta.client) {
-    if (import.meta.dev) {
-      return computed({
-        get: () => undefined,
-        set: () => appDiagnostics.NUXT_E1010(),
-      })
-    }
-    return ref()
-  }
-
-  const event = useRequestEvent()!
-
-  return computed({
-    get () {
-      return event.res.headers.get(header)
-    },
-    set (newValue) {
-      if (!newValue) {
-        return event.res.headers.delete(header)
-      }
-
-      return event.res.headers.set(header, newValue)
-    },
-  })
+    throw new Error("STUB");
 }
 
 /** @since 3.8.0 */
@@ -101,7 +54,7 @@ export function prerenderRoutes (path: string | string[]): void {
   if (!import.meta.server || !import.meta.prerender) { return }
 
   const paths = toArray(path)
-  useRequestEvent()?.res.headers.append('x-nitro-prerender', paths.map(p => encodeURIComponent(p)).join(', '))
+  useRequestEvent()?.res.headers.append('x-nitro-prerender', paths.map(p => { throw new Error("STUB"); }).join(', '))
 }
 
 const PREHYDRATE_ATTR_KEY = 'data-prehydrate-id'
@@ -118,32 +71,5 @@ const PREHYDRATE_ATTR_KEY = 'data-prehydrate-id'
  */
 export function onPrehydrate (callback: (el: HTMLElement) => void): void
 export function onPrehydrate (callback: string | ((el: HTMLElement) => void), key?: string): undefined | string {
-  if (import.meta.client) { return }
-
-  if (typeof callback !== 'string') {
-    throw appDiagnostics.NUXT_E1006()
-  }
-
-  const vm = getCurrentInstance()
-  if (vm && key) {
-    vm.attrs[PREHYDRATE_ATTR_KEY] ||= ''
-    key = ':' + key + ':'
-    if (!(vm.attrs[PREHYDRATE_ATTR_KEY] as string).includes(key)) {
-      vm.attrs[PREHYDRATE_ATTR_KEY] += key
-    }
-  }
-  const code = vm && key
-    ? `document.querySelectorAll('[${PREHYDRATE_ATTR_KEY}*=${JSON.stringify(key)}]').forEach` + callback
-    : (callback + '()')
-
-  useHead({
-    script: [{
-      key: vm && key ? key : undefined,
-      tagPosition: 'bodyClose',
-      tagPriority: 'critical',
-      innerHTML: code,
-    }],
-  })
-
-  return vm && key ? vm.attrs[PREHYDRATE_ATTR_KEY] as string : undefined
+    throw new Error("STUB");
 }

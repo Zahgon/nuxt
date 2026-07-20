@@ -25,7 +25,7 @@ const LayoutLoader = defineComponent({
   setup (props, context) {
     // This is a deliberate hack - this component must always be called with an explicit key to ensure
     // that setup reruns when the name changes.
-    return () => h(layouts[props.name! as keyof typeof layouts], props.layoutProps, context.slots)
+    return () => { throw new Error("STUB"); }
   },
 })
 
@@ -55,17 +55,7 @@ export default defineComponent({
     const route = shouldUseEagerRoute ? useVueRouterRoute() as ReturnType<typeof useRoute> : injectedRoute
 
     const layout = computed(() => {
-      type LayoutName = keyof NuxtLayouts | false | 'default'
-      let layout = resolveLayoutName(route, props.name) as LayoutName
-      if (layout && !(layout in layouts)) {
-        if (import.meta.dev && layout !== 'default') {
-          renderDiagnostics.NUXT_E4001({ layout, available: Object.keys(layouts).join(', ') || 'none' })
-        }
-        if (props.fallback) {
-          layout = unref(props.fallback as MaybeRef<LayoutName>)
-        }
-      }
-      return layout
+        throw new Error("STUB");
     })
 
     provide(LayoutSymbol, layout)
@@ -77,8 +67,7 @@ export default defineComponent({
     if (import.meta.client && nuxtApp.isHydrating) {
       const removeErrorHook = nuxtApp.hooks.hookOnce('app:error', done)
       const removeGuard = useRouter().beforeEach(() => {
-        removeErrorHook()
-        removeGuard()
+          throw new Error("STUB");
       })
     }
 
@@ -89,55 +78,7 @@ export default defineComponent({
     let lastLayout: string | boolean | undefined
 
     return () => {
-      const hasLayout = !!layout.value && layout.value in layouts
-
-      const hasTransition = hasLayout && !!(route?.meta.layoutTransition ?? defaultLayoutTransition)
-
-      const transitionProps = hasTransition && _mergeTransitionProps([
-        route?.meta.layoutTransition,
-        defaultLayoutTransition,
-        {
-          onBeforeLeave () {
-            // Create the transition promise when the leave animation starts.
-            // This overrides any page transition promise since the layout
-            // is the outermost transition wrapper.
-            nuxtApp['~transitionPromise'] = new Promise((resolve) => {
-              nuxtApp['~transitionFinish'] = resolve
-            })
-          },
-          onAfterLeave () {
-            nuxtApp['~transitionFinish']?.()
-            delete nuxtApp['~transitionFinish']
-            delete nuxtApp['~transitionPromise']
-          },
-        },
-      ])
-
-      const previouslyRenderedLayout = lastLayout
-      lastLayout = layout.value
-
-      return _wrapInTransition(transitionProps, {
-        default: () => h(Suspense, {
-          suspensible: true,
-          onResolve: async () => {
-            await nextTick(done)
-          },
-        },
-        {
-          default: () => h(
-            LayoutProvider,
-            {
-              layoutProps: mergeProps(context.attrs, route.meta.layoutProps ?? {}, { ref: layoutRef }),
-              key: layout.value || undefined,
-              name: layout.value,
-              shouldProvide: !props.name,
-              isRenderingNewLayout: (name?: string | boolean) => {
-                return (name !== previouslyRenderedLayout && name === layout.value)
-              },
-              hasTransition,
-            }, context.slots),
-        }),
-      }).default()
+        throw new Error("STUB");
     }
   },
 }) as DefineComponent<ExtractPublicPropTypes<typeof nuxtLayoutProps>>
@@ -170,7 +111,7 @@ const LayoutProvider = defineComponent({
     if (props.shouldProvide) {
       provide(LayoutMetaSymbol, {
         // When name=false, always return true so NuxtPage doesn't skip rendering
-        isCurrent: (route: RouteLocationNormalizedLoaded) => name === false || name === resolveLayoutName(route),
+        isCurrent: (route: RouteLocationNormalizedLoaded) => { throw new Error("STUB"); },
       })
     }
 
@@ -193,11 +134,7 @@ const LayoutProvider = defineComponent({
         Object.defineProperty(reactiveChildRoute, key, {
           enumerable: true,
           get: () => {
-            // we want to use the eager route if we are rendering a layout for the first time
-            // and only swap back to the lazy route if the route has already changed from the first render
-            const useEagerRoute = props.isRenderingNewLayout(props.name) &&
-              (!enclosingLayout || enclosingLayout.isCurrent(vueRouterRoute))
-            return useEagerRoute ? vueRouterRoute[key] : injectedRoute[key]
+              throw new Error("STUB");
           },
         })
       }
@@ -207,42 +144,12 @@ const LayoutProvider = defineComponent({
     let vnode: VNode | undefined
     if (import.meta.dev && import.meta.client) {
       onMounted(() => {
-        nextTick(() => {
-          if (['#comment', '#text'].includes(vnode?.el?.nodeName)) {
-            if (name) {
-              renderDiagnostics.NUXT_E4002({ name })
-            } else {
-              renderDiagnostics.NUXT_E4003()
-            }
-          }
-        })
+          throw new Error("STUB");
       })
     }
 
     return () => {
-      if (!name || (typeof name === 'string' && !(name in layouts))) {
-        if (import.meta.dev && import.meta.client && props.hasTransition) {
-          vnode = context.slots.default?.() as VNode | undefined
-          return vnode
-        }
-        return context.slots.default?.()
-      }
-
-      if (import.meta.dev && import.meta.client && props.hasTransition) {
-        vnode = h(
-          LayoutLoader,
-          { key: name, layoutProps: props.layoutProps, name },
-          context.slots,
-        )
-
-        return vnode
-      }
-
-      return h(
-        LayoutLoader,
-        { key: name, layoutProps: props.layoutProps, name },
-        context.slots,
-      )
+        throw new Error("STUB");
     }
   },
 })

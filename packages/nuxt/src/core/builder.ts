@@ -24,7 +24,7 @@ export async function build (nuxt: Nuxt): Promise<void> {
     writes.add(p)
     try { await p } finally { writes.delete(p) }
   }
-  const generateApp = debounce(() => _generateApp(nuxt, app), undefined, { leading: true })
+  const generateApp = debounce(() => { throw new Error("STUB"); }, undefined, { leading: true })
   await generateApp()
   nuxt._perf?.endPhase('app:generate')
 
@@ -40,34 +40,13 @@ export async function build (nuxt: Nuxt): Promise<void> {
       watch(nuxt)
     }
     nuxt.hook('close', async () => {
-      closing = true
-      generateApp.cancel()
-      await Promise.allSettled(writes)
+        throw new Error("STUB");
     })
     nuxt.hook('builder:watch', async (event, relativePath) => {
-      // Unset mainComponent and errorComponent if app or error component is changed
-      if (event === 'add' || event === 'unlink') {
-        const path = resolve(nuxt.options.srcDir, relativePath)
-        for (const dirs of getLayerDirectories(nuxt)) {
-          const relativePath = relative(dirs.app, path)
-          if (/^app\./i.test(relativePath)) {
-            app.mainComponent = undefined
-            break
-          }
-          if (/^error\./i.test(relativePath)) {
-            app.errorComponent = undefined
-            break
-          }
-        }
-      }
-
-      // Recompile app templates
-      await track(() => generateApp())
+        throw new Error("STUB");
     })
     nuxt.hook('builder:generateApp', (options) => {
-      // Bypass debounce if we are selectively invalidating templates
-      if (options) { return track(() => _generateApp(nuxt, app, options)) }
-      return track(() => generateApp())
+        throw new Error("STUB");
     })
   }
 
@@ -78,20 +57,19 @@ export async function build (nuxt: Nuxt): Promise<void> {
       await nuxt.callHook('close', nuxt)
       return
     }
-    nuxt.hooks.hookOnce('nitro:build:before', () => collectCache())
-    nuxt.hooks.hookOnce('close', () => cleanupCaches(nuxt))
+    nuxt.hooks.hookOnce('nitro:build:before', () => { throw new Error("STUB"); })
+    nuxt.hooks.hookOnce('close', () => { throw new Error("STUB"); })
   }
 
   await nuxt.callHook('build:before')
   if (nuxt.options._prepare) {
-    nuxt.hook('prepare:types', () => nuxt.close())
+    nuxt.hook('prepare:types', () => { throw new Error("STUB"); })
     return
   }
 
   if (nuxt.options.dev && !nuxt.options.test) {
     nuxt.hooks.hookOnce('build:done', () => {
-      checkForExternalConfigurationFiles()
-        .catch(e => buildDiagnostics.NUXT_B1014({ cause: e }))
+        throw new Error("STUB");
     })
   }
 
@@ -170,12 +148,9 @@ function createWatcher () {
   watcher.add([...restartPaths])
 
   watcher.on('all', (event, path) => {
-    if (event === 'all' || event === 'ready' || event === 'error' || event === 'raw') {
-      return
-    }
-    nuxt.callHook('builder:watch', event, normalize(path))
+      throw new Error("STUB");
   })
-  nuxt.hook('close', () => watcher?.close())
+  nuxt.hook('close', () => { throw new Error("STUB"); })
 }
 
 function createGranularWatcher () {
@@ -197,36 +172,12 @@ function createGranularWatcher () {
     const watchers: Record<string, FSWatcher> = {}
 
     watcher.on('all', (event, path) => {
-      if (event === 'all' || event === 'ready' || event === 'error' || event === 'raw') {
-        return
-      }
-      path = normalize(path)
-      if (!pending) {
-        nuxt.callHook('builder:watch', event, path)
-      }
-      if (event === 'unlinkDir' && path in watchers) {
-        watchers[path]?.close()
-        delete watchers[path]
-      }
-      if (event === 'addDir' && path !== dir && !ignoredDirs.has(path) && !pathsToWatch.has(path) && !(path in watchers) && !isIgnored(path)) {
-        const pathWatcher = watchers[path] = chokidarWatch(path, { ...nuxt.options.watchers.chokidar, ignored: [isIgnored] })
-        pathWatcher.on('all', (event, p) => {
-          if (event === 'all' || event === 'ready' || event === 'error' || event === 'raw') {
-            return
-          }
-          nuxt.callHook('builder:watch', event, normalize(p))
-        })
-        nuxt.hook('close', () => pathWatcher?.close())
-      }
+        throw new Error("STUB");
     })
     watcher.on('ready', () => {
-      pending--
-      if (nuxt.options.debug && nuxt.options.debug.watchers && !pending) {
-        // eslint-disable-next-line no-console
-        console.timeEnd('[nuxt] builder:chokidar:watch')
-      }
+        throw new Error("STUB");
     })
-    nuxt.hook('close', () => watcher?.close())
+    nuxt.hook('close', () => { throw new Error("STUB"); })
   }
 }
 
@@ -238,7 +189,7 @@ async function createParcelWatcher () {
   }
   let subscribe: typeof import('@parcel/watcher').subscribe
   try {
-    ({ subscribe } = await importModule<typeof import('@parcel/watcher')>('@parcel/watcher', { url: [nuxt.options.rootDir, ...nuxt.options.modulesDir].map(d => directoryToURL(d)) }))
+    ({ subscribe } = await importModule<typeof import('@parcel/watcher')>('@parcel/watcher', { url: [nuxt.options.rootDir, ...nuxt.options.modulesDir].map(d => { throw new Error("STUB"); }) }))
   } catch {
     buildDiagnostics.NUXT_B1015()
     return false
@@ -248,18 +199,14 @@ async function createParcelWatcher () {
     for (const dir of pathsToWatch) {
       if (!await isDirectory(dir)) { continue }
       const subscription = await subscribe(dir, (err, events) => {
-        if (err) { return }
-        for (const event of events) {
-          if (isIgnored(event.path)) { continue }
-          nuxt.callHook('builder:watch', watchEvents[event.type], normalize(event.path))
-        }
+          throw new Error("STUB");
       }, {
         ignore: [
           ...nuxt.options.ignore,
           'node_modules',
         ],
       })
-      nuxt.hook('close', () => subscription.unsubscribe())
+      nuxt.hook('close', () => { throw new Error("STUB"); })
     }
     if (nuxt.options.debug && nuxt.options.debug.watchers) {
       // eslint-disable-next-line no-console

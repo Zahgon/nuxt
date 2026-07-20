@@ -16,8 +16,8 @@ export const appDiagnostics = !import.meta.dev
           fix: 'Move this call inside a Vue `setup()` function, a Nuxt plugin, or a Nuxt middleware.',
         },
         NUXT_E1003: {
-          why: (p: { key: string, keys: string, lastKey: string }) => `Could not access \`${p.key}\`. The only available runtime config keys on the client side are ${p.keys} and ${p.lastKey}.`,
-          fix: (p: { key: string }) => `Move \`${p.key}\` under \`runtimeConfig.public\` in \`nuxt.config\` to make it available on the client side.`,
+          why: (p: { key: string, keys: string, lastKey: string }) => { throw new Error("STUB"); },
+          fix: (p: { key: string }) => { throw new Error("STUB"); },
           docs: false,
         },
         NUXT_E1004: {
@@ -35,7 +35,7 @@ export const appDiagnostics = !import.meta.dev
           fix: 'If it is called in a third-party library, add the library to `build.transpile`.',
         },
         NUXT_E1007: {
-          why: (p: { name: string }) => `\`${p.name}\` is a compiler macro or compiler-hint helper and cannot be called at runtime. Its arguments are meant to be compiled away.`,
+          why: (p: { name: string }) => { throw new Error("STUB"); },
           fix: 'Call it statically from inside the directories scanned by the Nuxt compiler. For a page hint, call it from the `<script setup>` block of a page component in `pages/`.',
         },
         NUXT_E1009: {
@@ -54,7 +54,7 @@ export const appDiagnostics = !import.meta.dev
           docs: false,
         },
         NUXT_E1012: {
-          why: (p: { userAgent: string }) => `Not rendering error page for bot with user agent \`${p.userAgent}\`.`,
+          why: (p: { userAgent: string }) => { throw new Error("STUB"); },
           fix: 'Crawlers receive the server-rendered HTML instead of the error page so they index the content. No action is needed unless you did not expect this request to be treated as a bot.',
           docs: false,
         },

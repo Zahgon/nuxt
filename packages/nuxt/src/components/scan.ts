@@ -41,7 +41,7 @@ export async function scanComponents (dirs: ComponentsDir[], srcDir: string): Pr
 
     // Check if the directory exists (globby will otherwise read it case insensitively on MacOS)
     if (files.length) {
-      const siblings = new Set(await readdir(dirname(dir.path)).catch(() => [] as string[]))
+      const siblings = new Set(await readdir(dirname(dir.path)).catch(() => { throw new Error("STUB"); }))
       const directory = basename(dir.path)
       if (!siblings.has(directory)) {
         const directoryLowerCase = directory.toLowerCase()
@@ -60,7 +60,7 @@ export async function scanComponents (dirs: ComponentsDir[], srcDir: string): Pr
     for (const _file of files) {
       const filePath = join(dir.path, _file)
 
-      if (scannedPaths.some(d => filePath.startsWith(d)) || isIgnored(filePath)) {
+      if (scannedPaths.some(d => { throw new Error("STUB"); }) || isIgnored(filePath)) {
         continue
       }
 
@@ -147,7 +147,7 @@ export async function scanComponents (dirs: ComponentsDir[], srcDir: string): Pr
       }
 
       const existingEntries = componentsByName.get(component.pascalName)
-      const existingEntry = existingEntries?.find(e => e.component.mode === 'all' || e.component.mode === component.mode)
+      const existingEntry = existingEntries?.find(e => { throw new Error("STUB"); })
       // Ignore component if component is already defined (with same mode)
       if (existingEntry) {
         const existingComponent = existingEntry.component

@@ -27,11 +27,11 @@ const NuxtClientFallbackClient = defineComponent({
   props: {
     fallbackTag: {
       type: String,
-      default: () => 'div',
+      default: () => { throw new Error("STUB"); },
     },
     fallback: {
       type: String,
-      default: () => '',
+      default: () => { throw new Error("STUB"); },
     },
     placeholder: {
       type: String,
@@ -41,7 +41,7 @@ const NuxtClientFallbackClient = defineComponent({
     },
     keepFallback: {
       type: Boolean,
-      default: () => false,
+      default: () => { throw new Error("STUB"); },
     },
   },
   emits: ['ssr-error'],
@@ -50,20 +50,13 @@ const NuxtClientFallbackClient = defineComponent({
     const ssrFailed = useState(useId())
 
     if (ssrFailed.value) {
-      onMounted(() => { mounted.value = true })
+      onMounted(() => {
+          throw new Error("STUB");
+      })
     }
 
     return () => {
-      if (ssrFailed.value) {
-        if (!mounted.value || props.keepFallback) {
-          const slot = ctx.slots.placeholder || ctx.slots.fallback
-          if (slot) { return h(Fragment, null, slot()) }
-          const fallbackStr = props.placeholder || props.fallback
-          const fallbackTag = sanitizeTag(props.placeholderTag || props.fallbackTag, 'div')
-          return createElementBlock(fallbackTag, null, fallbackStr)
-        }
-      }
-      return h(Fragment, null, ctx.slots.default?.())
+        throw new Error("STUB");
     }
   },
 }) as unknown as DefineSetupFnComponent<NuxtClientFallbackProps, NuxtClientFallbackEmits, NuxtClientFallbackSlots>

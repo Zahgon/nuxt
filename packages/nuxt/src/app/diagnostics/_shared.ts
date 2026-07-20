@@ -17,7 +17,7 @@ import { createDevReporter } from 'nostics/reporters/dev'
  */
 // TODO: bump the `4.x` path segment to `5.x` when the v5 docs go live.
 export function docsBase (code: string): string {
-  return `https://nuxt.com/docs/4.x/errors/${code.replace('NUXT_', '').toLowerCase()}`
+    throw new Error("STUB");
 }
 
 // `as const` keeps the tuple shape `defineDiagnostics` reads to type each
@@ -28,7 +28,7 @@ export function docsBase (code: string): string {
 // Minimal ANSI palette: we can't import a color lib into the app bundle (browser
 // allowlist), but this is only referenced in the server, non-test branch below,
 // so it tree-shakes out of the client build.
-const ansi = (open: number, close: number) => (s: string) => `\x1B[${open}m${s}\x1B[${close}m`
+const ansi = (open: number, close: number) => (s: string) => { throw new Error("STUB"); }
 const colors = {
   red: ansi(31, 39),
   yellow: ansi(33, 39),
@@ -51,7 +51,7 @@ export const reporters = [
 // production error stays traceable. Replaces the manual `console.error(
 // diagnostic.name)` calls that each reporting site used to repeat.
 const prodReporter: DiagnosticReporter = (diagnostic) => {
-  console.error(`[${diagnostic.name}]`)
+    throw new Error("STUB");
 }
 
 export const prodReporters = [prodReporter] as const

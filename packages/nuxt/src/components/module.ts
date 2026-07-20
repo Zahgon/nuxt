@@ -32,7 +32,7 @@ const SLASH_SEPARATOR_RE = /[\\/]/
  * @returns A negative number if the first directory should come before the second, positive if after, or 0 if equal
  */
 function compareDirByPathLength ({ path: pathA }: { path: string }, { path: pathB }: { path: string }) {
-  return pathB.split(SLASH_SEPARATOR_RE).filter(Boolean).length - pathA.split(SLASH_SEPARATOR_RE).filter(Boolean).length
+    throw new Error("STUB");
 }
 
 const DEFAULT_COMPONENTS_DIRS_RE = /\/components(?:\/(?:global|islands))?$/
@@ -56,7 +56,7 @@ export default defineNuxtModule<ComponentsOptions>({
 
     const getComponents: getComponentsT = (mode) => {
       return (mode && mode !== 'all')
-        ? context.components.filter(c => c.mode === mode || c.mode === 'all' || (c.mode === 'server' && !context.components.some(otherComponent => otherComponent.mode !== 'server' && otherComponent.pascalName === c.pascalName)))
+        ? context.components.filter(c => { throw new Error("STUB"); })
         : context.components
     }
 
@@ -67,77 +67,7 @@ export default defineNuxtModule<ComponentsOptions>({
 
     // Resolve dirs
     nuxt.hook('app:resolve', async () => {
-      // components/ dirs from all layers
-      const allDirs: ComponentsDir[] = []
-      const layerCount = nuxt.options._layers.length
-      for (const [i, layer] of nuxt.options._layers.entries()) {
-        // Assign priority based on layer position: lower index = higher priority
-        // This ensures correct override order: root > auto-scanned > extends layers
-        const priority = layerCount - i
-        const layerDirs = normalizeDirs(layer.config.components, layer.config.srcDir, { priority })
-        allDirs.push(...layerDirs)
-      }
-
-      await nuxt.callHook('components:dirs', allDirs)
-
-      const userComponentDirs: ComponentsDir[] = []
-      const libraryComponentDirs: ComponentsDir[] = []
-
-      for (const dir of allDirs) {
-        if (!isPureObjectOrString(dir)) {
-          continue
-        }
-
-        const dirOptions = typeof dir === 'object' ? dir : { path: dir }
-        const dirPath = resolveAlias(dirOptions.path)
-        const extensions = (dirOptions.extensions || nuxt.options.extensions).map(e => e.replace(STARTER_DOT_RE, ''))
-        const _transpile = typeof dirOptions.transpile === 'boolean' ? dirOptions.transpile : 'auto'
-        const transpile = _transpile === 'auto' ? dirPath.includes('node_modules') : _transpile
-        if (transpile) {
-          nuxt.options.build.transpile.push(dirPath)
-        }
-
-        const present = isDirectorySync(dirPath)
-        if (!present && !DEFAULT_COMPONENTS_DIRS_RE.test(dirOptions.path)) {
-          componentDiagnostics.NUXT_B3001({ dirPath })
-        }
-
-        const inNodeModules = dirPath.includes('node_modules')
-
-        // Watch external component dirs so newly added components are picked up in
-        // dev without a restart. Layer app dirs are already watched, and the
-        // builder watchers unconditionally ignore `node_modules`, so paths there
-        // cannot be watched regardless of the `watch` option.
-        if (nuxt.options.dev && dirOptions.watch !== false && !inNodeModules) {
-          const coveredByLayer = getLayerDirectories(nuxt).some(dirs =>
-            dirPath === dirs.app.replace(/\/$/, '') || dirPath.startsWith(dirs.app),
-          )
-          if (!coveredByLayer && !nuxt.options.watch.includes(dirPath)) {
-            nuxt.options.watch.push(dirPath)
-          }
-        }
-
-        const dirs = inNodeModules ? libraryComponentDirs : userComponentDirs
-
-        dirs.push({
-          global: moduleOptions.global,
-          ...dirOptions,
-          path: dirPath,
-          extensions,
-          pattern: dirOptions.pattern || (extensions.length > 1 ? `**/*.{${extensions.join(',')}}` : `**/*.${extensions[0] || '*'}`),
-          ignore: [
-            '**/*{M,.m,-m}ixin.{js,ts,jsx,tsx}', // ignore mixins
-            `**/*.{${DECLARATION_EXTENSIONS.join(',')},}`, // .d.ts files
-            ...(dirOptions.ignore || []),
-          ],
-          transpile,
-        })
-      }
-
-      componentDirs = [
-        ...userComponentDirs,
-        ...libraryComponentDirs,
-      ]
+        throw new Error("STUB");
     })
 
     // components.d.ts
@@ -161,76 +91,25 @@ export default defineNuxtModule<ComponentsOptions>({
 
     // Do not prefetch global components chunks
     nuxt.hook('build:manifest', (manifest) => {
-      const sourceFiles = new Set<string>()
-      for (const c of getComponents()) {
-        if (c.global) {
-          sourceFiles.add(relative(nuxt.options.srcDir, c.filePath))
-        }
-      }
-
-      for (const chunk of Object.values(manifest)) {
-        if (chunk.isEntry) {
-          chunk.dynamicImports = chunk.dynamicImports?.filter(i => !sourceFiles.has(i))
-        }
-      }
+        throw new Error("STUB");
     })
 
     // Restart dev server when component directories are added/removed
     const restartEvents = new Set(['addDir', 'unlinkDir'])
     // const restartPaths
     nuxt.hook('builder:watch', (event, relativePath) => {
-      if (!restartEvents.has(event)) {
-        return
-      }
-
-      const path = resolve(nuxt.options.srcDir, relativePath)
-      if (componentDirs.some(dir => dir.path === path)) {
-        logger.info(`Directory \`${relativePath}/\` ${event === 'addDir' ? 'created' : 'removed'}`)
-        return nuxt.callHook('restart')
-      }
+        throw new Error("STUB");
     })
 
     const serverPlaceholderPath = await findPath(join(distDir, 'app/components/server-placeholder')) ?? join(distDir, 'app/components/server-placeholder')
 
     // Scan components and add to plugin
     nuxt.hook('app:templates', async (app) => {
-      const newComponents = await scanComponents(componentDirs, nuxt.options.srcDir!)
-      await nuxt.callHook('components:extend', newComponents)
-      const modesByName = new Map<string, Set<string | undefined>>()
-      for (const component of newComponents) {
-        let modes = modesByName.get(component.pascalName)
-        if (!modes) {
-          modes = new Set()
-          modesByName.set(component.pascalName, modes)
-        }
-        modes.add(component.mode)
-      }
-      // add server placeholder for .client components server side. issue: #7085
-      for (const component of newComponents) {
-        if (!(component as any /* untyped internal property */)._scanned && !(component.filePath in nuxt.vfs) && isAbsolute(component.filePath) && !existsSync(component.filePath)) {
-          // attempt to resolve component path
-          component.filePath = resolveModulePath(resolveAlias(component.filePath), { try: true, extensions: nuxt.options.extensions }) ?? component.filePath
-        }
-        if (component.mode === 'client' && !modesByName.get(component.pascalName)?.has('server')) {
-          newComponents.push({
-            ...component,
-            _raw: true,
-            mode: 'server',
-            filePath: serverPlaceholderPath,
-            chunkName: 'components/' + component.kebabName,
-          })
-          modesByName.get(component.pascalName)!.add('server')
-        }
-        if (component.mode === 'server' && !nuxt.options.ssr && !modesByName.get(component.pascalName)?.has('client')) {
-          componentDiagnostics.NUXT_B3002({ component: component.pascalName })
-        }
-      }
-      context.components = newComponents
-      app.components = newComponents
+        throw new Error("STUB");
     })
 
     nuxt.hook('prepare:types', ({ tsConfig }) => {
-      tsConfig.compilerOptions!.paths['#components'] = [resolve(nuxt.options.buildDir, 'components')]
+        throw new Error("STUB");
     })
 
     addBuildPlugin(TreeShakeTemplatePlugin({ getComponents }), { client: false })
@@ -270,7 +149,7 @@ export default defineNuxtModule<ComponentsOptions>({
         handleHotUpdate (ctx) {
           const components = getComponents()
           const filePath = normalize(ctx.file)
-          const comp = components.find(c => c.filePath === filePath)
+          const comp = components.find(c => { throw new Error("STUB"); })
           if (comp?.mode === 'server') {
             ctx.server.ws.send({
               event: `nuxt-server-component:${comp.pascalName}`,
@@ -299,11 +178,11 @@ export default defineNuxtModule<ComponentsOptions>({
       addBuildPlugin(IslandsTransformPlugin({ getComponents, getServerPages, selectiveClient }), { client: false, prepend: true })
 
       if (selectiveClient && nuxt.options.builder === '@nuxt/vite-builder') {
-        addVitePlugin(() => ComponentsChunkPlugin({ dev: nuxt.options.dev, getComponents }))
+        addVitePlugin(() => { throw new Error("STUB"); })
       } else {
         addTemplate({
           filename: 'component-chunk.mjs',
-          getContents: () => `export default {}`,
+          getContents: () => { throw new Error("STUB"); },
         })
       }
     }
@@ -329,7 +208,7 @@ export default defineNuxtModule<ComponentsOptions>({
  */
 function normalizeDirs (dir: undefined | boolean | ComponentsOptions | ComponentsOptions['dirs'] | ComponentsOptions['dirs'][number], cwd: string, options?: { priority?: number }): ComponentsDir[] {
   if (Array.isArray(dir)) {
-    return dir.map(dir => normalizeDirs(dir, cwd, options)).flat().sort(compareDirByPathLength)
+    return dir.map(dir => { throw new Error("STUB"); }).flat().sort(compareDirByPathLength)
   }
   if (dir === true || dir === undefined) {
     return [

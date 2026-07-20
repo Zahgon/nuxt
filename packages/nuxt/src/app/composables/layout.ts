@@ -26,10 +26,5 @@ export function resolveLayoutName (route: Pick<RouteLocationNormalizedLoaded, 'm
  * @since 4.5.0
  */
 export function useLayout (): Readonly<ComputedRef<LayoutName>> {
-  const injected = inject(LayoutSymbol, null)
-  if (injected) {
-    return injected as Readonly<ComputedRef<LayoutName>>
-  }
-  const route = useRoute()
-  return computed(() => resolveLayoutName(route))
+    throw new Error("STUB");
 }

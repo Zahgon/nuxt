@@ -6,12 +6,5 @@ const intervalError = '[nuxt] `setInterval` should not be used on the server. Co
 export const setInterval: typeof globalThis.setInterval = import.meta.client
   ? globalThis.setInterval
   : (() => {
-      if (import.meta.dev) {
-        throw createError({
-          status: 500,
-          message: intervalError,
-        })
-      }
-
-      appDiagnostics.NUXT_E1004()
+        throw new Error("STUB");
     }) as any

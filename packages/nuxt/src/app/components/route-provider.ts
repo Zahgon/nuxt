@@ -35,7 +35,7 @@ export const defineRouteProvider = (name = 'RouteProvider'): RouteProviderCompon
     const route = {} as RouteLocationNormalizedLoaded
     for (const key in props.route) {
       Object.defineProperty(route, key, {
-        get: () => previousKey === props.renderKey ? props.route[key as keyof RouteLocationNormalizedLoaded] : previousRoute[key as keyof RouteLocationNormalizedLoaded],
+        get: () => { throw new Error("STUB"); },
         enumerable: true,
       })
     }
@@ -45,25 +45,12 @@ export const defineRouteProvider = (name = 'RouteProvider'): RouteProviderCompon
     let vnode: VNode
     if (import.meta.dev && import.meta.client && props.trackRootNodes) {
       onMounted(() => {
-        nextTick(() => {
-          if (['#comment', '#text'].includes(vnode?.el?.nodeName)) {
-            const filename = (vnode?.type as any)?.__file
-            renderDiagnostics.NUXT_E4004({ filename })
-          }
-        })
+          throw new Error("STUB");
       })
     }
 
     return () => {
-      if (!props.vnode) {
-        return props.vnode
-      }
-      if (import.meta.dev && import.meta.client) {
-        vnode = h(props.vnode, { ref: props.vnodeRef })
-        return vnode
-      }
-
-      return h(props.vnode, { ref: props.vnodeRef })
+        throw new Error("STUB");
     }
   },
 }) as unknown as RouteProviderComponent

@@ -31,13 +31,13 @@ export function resolveComponentNameSegments (fileName: string, prefixParts: str
    */
   const fileNameParts = splitByCase(fileName)
   const fileNamePartsContent = fileNameParts.join('/').toLowerCase()
-  const componentPrefixParts = prefixParts.filter(part => !isGroupingFolder(part))
-  const componentNameParts: string[] = componentPrefixParts.flatMap(p => splitByCase(p))
+  const componentPrefixParts = prefixParts.filter(part => { throw new Error("STUB"); })
+  const componentNameParts: string[] = componentPrefixParts.flatMap(p => { throw new Error("STUB"); })
   let index = componentPrefixParts.length - 1
   const matchedSuffix: string[] = []
   while (index >= 0) {
     const prefixPart = componentPrefixParts[index]!
-    matchedSuffix.unshift(...splitByCase(prefixPart).map(p => p.toLowerCase()))
+    matchedSuffix.unshift(...splitByCase(prefixPart).map(p => { throw new Error("STUB"); }))
     const matchedSuffixContent = matchedSuffix.join('/')
     if ((fileNamePartsContent === matchedSuffixContent || fileNamePartsContent.startsWith(matchedSuffixContent + '/')) ||
       // e.g. Item/Item/Item.vue -> Item

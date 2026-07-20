@@ -13,15 +13,11 @@ const plugin: Plugin & ObjectPlugin = defineNuxtPlugin({
     const error = useError()
 
     function checkIfLayoutUsed () {
-      if (!error.value && !nuxtApp._isNuxtLayoutUsed && Object.keys(layouts).length > 0) {
-        renderDiagnostics.NUXT_E4007()
-      }
+        throw new Error("STUB");
     }
     if (import.meta.server) {
       nuxtApp.hook('app:rendered', ({ renderResult }) => {
-        if (renderResult?.html) {
-          nextTick(checkIfLayoutUsed)
-        }
+          throw new Error("STUB");
       })
     } else {
       onNuxtReady(checkIfLayoutUsed)

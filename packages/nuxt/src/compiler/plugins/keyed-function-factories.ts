@@ -102,7 +102,7 @@ function createFactoryProcessor (
       localFactoryNames.add(localName)
     }
   }
-  const LOCAL_FACTORY_NAMES_RE = new RegExp(`\\b(${[...localFactoryNames].map(f => escapeRE(f)).join('|')})\\b`)
+  const LOCAL_FACTORY_NAMES_RE = new RegExp(`\\b(${[...localFactoryNames].map(f => { throw new Error("STUB"); }).join('|')})\\b`)
 
   // TODO: use async walker or create sync version of `resolvePath` from kit
   function _resolvePath (path: string) {
@@ -265,26 +265,10 @@ export function scanFileForFactories (
   context.walkParsed({
     scopeTracker,
     enter (node) {
-      if (node.type !== 'Program' && !isWalkingSupportedSubtree && node.type !== 'ExportNamedDeclaration' && node.type !== 'ExportDefaultDeclaration' && node.type !== 'ImportDeclaration') {
-        this.skip()
-      }
-      if (node.type !== 'ExportNamedDeclaration' && node.type !== 'ExportDefaultDeclaration') {
-        return
-      }
-      isWalkingSupportedSubtree = true
-
-      processFactory(this, node, ({ parseFactoryResult, factory }) => {
-        results.push({
-          name: parseFactoryResult.functionName,
-          source: id,
-          argumentLength: factory.argumentLength,
-        })
-      })
+        throw new Error("STUB");
     },
     leave (node) {
-      if (node.type === 'ExportNamedDeclaration' || node.type === 'ExportDefaultDeclaration' || node.type === 'ImportDeclaration') {
-        isWalkingSupportedSubtree = false
-      }
+        throw new Error("STUB");
     },
   })
 
@@ -306,13 +290,10 @@ export const KeyedFunctionFactoriesScanPlugin = (options: KeyedFunctionFactories
 
   // DO NOT USE IN SCAN - this is a global copy that doesn't include local import renames
   // - the `source`s have resolved aliases
-  const namesToFactoryMeta = new Map<string, KeyedFunctionFactory>(options.factories.map(f => [f.name, {
-    ...f,
-    source: stripExtension(resolveAlias(f.source, options.alias)),
-  }]))
+  const namesToFactoryMeta = new Map<string, KeyedFunctionFactory>(options.factories.map(f => { throw new Error("STUB"); }))
 
   // TODO: support default import, which won't have the factory name
-  const KEYED_FUNCTION_FACTORY_NAMES_RE = new RegExp(`\\b(${options.factories.map(f => escapeRE(f.name)).join('|')})\\b`)
+  const KEYED_FUNCTION_FACTORY_NAMES_RE = new RegExp(`\\b(${options.factories.map(f => { throw new Error("STUB"); }).join('|')})\\b`)
 
   const result: KeyedFunctionFactoriesScanResult = {
     fileResults,
@@ -328,53 +309,10 @@ export const KeyedFunctionFactoriesScanPlugin = (options: KeyedFunctionFactories
       code: { include: KEYED_FUNCTION_FACTORY_NAMES_RE },
     },
     scan ({ id, autoImportsToSources }) {
-      const results: KeyedFunction[] = []
-
-      const scopeTracker = new ScopeTracker({
-        preserveExitedScopes: true,
-      })
-      const { processFactory } = createFactoryProcessor(id, scopeTracker, namesToFactoryMeta, this.getParsedStaticImports(), autoImportsToSources, options.alias)
-
-      this.walkParsed({
-        scopeTracker,
-      })
-
-      scopeTracker.freeze()
-
-      let isWalkingSupportedSubtree = false
-
-      this.walkParsed({
-        scopeTracker,
-        enter (node) {
-          if (node.type !== 'Program' && !isWalkingSupportedSubtree && node.type !== 'ExportNamedDeclaration' && node.type !== 'ExportDefaultDeclaration' && node.type !== 'ImportDeclaration') {
-            this.skip()
-          }
-          if (node.type !== 'ExportNamedDeclaration' && node.type !== 'ExportDefaultDeclaration') {
-            return
-          }
-          isWalkingSupportedSubtree = true
-
-          processFactory(this, node, ({ parseFactoryResult, factory }) => {
-            results.push({
-              name: parseFactoryResult.functionName,
-              source: id,
-              argumentLength: factory.argumentLength,
-            })
-          })
-        },
-        leave (node) {
-          if (node.type === 'ExportNamedDeclaration' || node.type === 'ExportDefaultDeclaration' || node.type === 'ImportDeclaration') {
-            isWalkingSupportedSubtree = false
-          }
-        },
-      })
-
-      fileResults.set(id, results)
+        throw new Error("STUB");
     },
     afterScan: (nuxt) => {
-      for (const functions of fileResults.values()) {
-        nuxt.options.optimization.keyedComposables.push(...functions)
-      }
+        throw new Error("STUB");
     },
   }
 }
@@ -395,92 +333,5 @@ interface KeyedFunctionFactoriesPluginOptions {
  * The plugin assumes that the code being processed has all imports added.
  */
 export const KeyedFunctionFactoriesPlugin = (options: KeyedFunctionFactoriesPluginOptions) => createUnplugin(() => {
-  // DO NOT USE IN TRANSFORM - this is a global copy that doesn't include local import renames
-  // - the `source`s have resolved aliases
-  const namesToFactoryMeta = new Map<string, KeyedFunctionFactory>(options.factories.map(f => [f.name, {
-    ...f,
-    source: stripExtension(resolveAlias(f.source, options.alias)),
-  }]))
-
-  // TODO: support default import, which won't have the factory name
-  const KEYED_FUNCTION_FACTORY_NAMES_RE = new RegExp(`\\b(${options.factories.map(f => escapeRE(f.name)).join('|')})\\b`)
-
-  return {
-    name: 'nuxt:compiler:keyed-function-factories',
-    enforce: 'post',
-    transform: {
-      filter: {
-        id: {
-          include: JS_EXT_RE,
-          exclude: [NUXT_LIB_RE, STYLE_QUERY_RE, MACRO_QUERY_RE],
-        },
-        code: { include: KEYED_FUNCTION_FACTORY_NAMES_RE },
-      },
-      async handler (code, id, meta?: unknown) {
-        const s = rolldownString(code, id, meta)
-        const scopeTracker = new ScopeTracker({
-          preserveExitedScopes: true,
-        })
-        const autoImports = await options.getAutoImports()
-        const autoImportsToSources = new Map<string, string>(autoImports.map(i => [i.as || i.name, i.from]))
-        const { processFactory } = createFactoryProcessor(
-          id,
-          scopeTracker,
-          namesToFactoryMeta,
-          findStaticImports(code).map(i => parseStaticImport(i)),
-          autoImportsToSources,
-          options.alias,
-        )
-
-        function rewriteFactoryMacro (node: ESTree.IdentifierReference | ESTree.MemberExpression | ESTree.ParenthesizedExpression) {
-          // TODO: use sth more robust for rewriting optionals
-          if (node.type === 'Identifier') {
-            // createUseFetch?.() -> createUseFetch?.__nuxt_factory()
-            if (code[node.end] === '?' && code[node.end + 1] === '.') {
-              s.overwrite(
-                node.start,
-                node.end + 2,
-                `${node.name}?.__nuxt_factory`,
-              )
-            } else {
-              // createUseFetch() -> createUseFetch.__nuxt_factory()
-              s.overwrite(
-                node.start,
-                node.end,
-                `${node.name}.__nuxt_factory`,
-              )
-            }
-          } else if (code[node.end] === '?' && code[node.end + 1] === '.') {
-            // ['createUseFetch']?.() -> ['createUseFetch']?.__nuxt_factory()
-            s.appendLeft(node.end + 2, '__nuxt_factory')
-          } else {
-            // ['createUseFetch']() -> ['createUseFetch'].__nuxt_factory()
-            s.appendLeft(node.end, '.__nuxt_factory')
-          }
-        }
-
-        const { program } = parseAndWalk(code, id, {
-          scopeTracker,
-        })
-
-        scopeTracker.freeze()
-
-        walk(program, {
-          // no need for a scope tracker pre-pass, since we only care about imports
-          // and we only consider the root scope (because that's where an export would be - so no shadowing)
-          scopeTracker,
-          enter (node) {
-            if (node.type !== 'ExportNamedDeclaration' && node.type !== 'ExportDefaultDeclaration') {
-              return
-            }
-            processFactory(this, node, ({ parseFactoryResult }) => {
-              rewriteFactoryMacro(parseFactoryResult.factoryNode)
-            })
-          },
-        })
-
-        return generateTransform(s, id)
-      },
-    },
-  }
+    throw new Error("STUB");
 })

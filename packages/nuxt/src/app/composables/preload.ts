@@ -15,10 +15,7 @@ export const preloadComponents = async (components: string | string[]): Promise<
 
   components = toArray(components)
   await Promise.all(components.map((name) => {
-    const component = nuxtApp.vueApp._context.components[name]
-    if (component) {
-      return _loadAsyncComponent(component)
-    }
+      throw new Error("STUB");
   }))
 }
 
@@ -28,10 +25,7 @@ export const preloadComponents = async (components: string | string[]): Promise<
  * @since 3.0.0
  */
 export const prefetchComponents = (components: string | string[]): Promise<void> | undefined => {
-  if (import.meta.server) { return }
-
-  // TODO
-  return preloadComponents(components)
+    throw new Error("STUB");
 }
 
 // --- Internal ---
@@ -56,7 +50,7 @@ export async function preloadRouteComponents (to: RouteLocationRaw, router: Rout
 
   if (promises.length > 4) {
     // Defer adding new preload requests until the existing ones have resolved
-    return Promise.all(promises).then(() => preloadRouteComponents(to, router))
+    return Promise.all(promises).then(() => { throw new Error("STUB"); })
   }
 
   router._routePreloaded.add(path)
@@ -67,8 +61,10 @@ export async function preloadRouteComponents (to: RouteLocationRaw, router: Rout
       continue
     }
     const promise = Promise.resolve((component as () => unknown)())
-      .catch(() => {})
-      .finally(() => promises.splice(promises.indexOf(promise), 1))
+      .catch(() => {
+          throw new Error("STUB");
+      })
+      .finally(() => { throw new Error("STUB"); })
     promises.push(promise)
   }
 

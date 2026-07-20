@@ -119,8 +119,7 @@ const plugin: Plugin<{ route: Route, router: Router }> & ObjectPlugin<{ route: R
     const registerHook = <T extends keyof RouterHooks> (hook: T, guard: RouterHooks[T]) => {
       hooks[hook].push(guard)
       return () => {
-        const index = hooks[hook].indexOf(guard)
-        if (index !== -1) { hooks[hook].splice(index, 1) }
+          throw new Error("STUB");
       }
     }
     const baseURL = useRuntimeConfig().app.baseURL
@@ -170,35 +169,34 @@ const plugin: Plugin<{ route: Route, router: Router }> & ObjectPlugin<{ route: R
       }
     }
 
-    const currentRoute = computed(() => route)
+    const currentRoute = computed(() => { throw new Error("STUB"); })
 
     const router: Router = {
       currentRoute,
-      isReady: () => Promise.resolve(),
+      isReady: () => { throw new Error("STUB"); },
       // These options provide a similar API to vue-router but have no effect
       options: {},
-      install: () => Promise.resolve(),
+      install: () => { throw new Error("STUB"); },
       // Navigation
-      push: (url: string) => handleNavigation(url, false),
-      replace: (url: string) => handleNavigation(url, true),
-      back: () => window.history.go(-1),
-      go: (delta: number) => window.history.go(delta),
-      forward: () => window.history.go(1),
+      push: (url: string) => { throw new Error("STUB"); },
+      replace: (url: string) => { throw new Error("STUB"); },
+      back: () => { throw new Error("STUB"); },
+      go: (delta: number) => { throw new Error("STUB"); },
+      forward: () => { throw new Error("STUB"); },
       // Guards
-      beforeResolve: (guard: RouterHooks['resolve:before']) => registerHook('resolve:before', guard),
-      beforeEach: (guard: RouterHooks['navigate:before']) => registerHook('navigate:before', guard),
-      afterEach: (guard: RouterHooks['navigate:after']) => registerHook('navigate:after', guard),
-      onError: (handler: RouterHooks['error']) => registerHook('error', handler),
+      beforeResolve: (guard: RouterHooks['resolve:before']) => { throw new Error("STUB"); },
+      beforeEach: (guard: RouterHooks['navigate:before']) => { throw new Error("STUB"); },
+      afterEach: (guard: RouterHooks['navigate:after']) => { throw new Error("STUB"); },
+      onError: (handler: RouterHooks['error']) => { throw new Error("STUB"); },
       // Routes
       resolve: getRouteFromPath,
-      addRoute: (parentName: string, route: Route) => { routes.push(route) },
-      getRoutes: () => routes,
-      hasRoute: (name: string) => routes.some(route => route.name === name),
+      addRoute: (parentName: string, route: Route) => {
+          throw new Error("STUB");
+      },
+      getRoutes: () => { throw new Error("STUB"); },
+      hasRoute: (name: string) => { throw new Error("STUB"); },
       removeRoute: (name: string) => {
-        const index = routes.findIndex(route => route.name === name)
-        if (index !== -1) {
-          routes.splice(index, 1)
-        }
+          throw new Error("STUB");
       },
     }
 
@@ -217,20 +215,13 @@ const plugin: Plugin<{ route: Route, router: Router }> & ObjectPlugin<{ route: R
         ariaCurrentValue: String,
       },
       setup: (props, { slots }) => {
-        const navigate = () => handleNavigation(props.to!, props.replace)
-        return () => {
-          const route = router.resolve(props.to!)
-          return props.custom
-            ? slots.default?.({ href: props.to, navigate, route })
-            : h('a', { href: props.to, onClick: (e: MouseEvent) => { e.preventDefault(); return navigate() } }, slots)
-        }
+          throw new Error("STUB");
       },
     }))
 
     if (import.meta.client) {
       window.addEventListener('popstate', (event) => {
-        const location = (event.target as Window).location
-        router.replace(location.href.replace(location.origin, ''))
+          throw new Error("STUB");
       })
     }
 
@@ -246,70 +237,7 @@ const plugin: Plugin<{ route: Route, router: Router }> & ObjectPlugin<{ route: R
     const initialLayout = nuxtApp.payload.state._layout
     const initialLayoutProps = nuxtApp.payload.state._layoutProps
     nuxtApp.hooks.hookOnce('app:created', async () => {
-      router.beforeEach(async (to, from) => {
-        to.meta = reactive(to.meta || {})
-        if (nuxtApp.isHydrating && initialLayout && !isReadonly(to.meta.layout)) {
-          to.meta.layout = initialLayout
-          to.meta.layoutProps = initialLayoutProps
-        }
-        nuxtApp._processingMiddleware = true
-        if (import.meta.server) {
-          nuxtApp._middlewareTo = to
-        }
-
-        if (import.meta.client || !nuxtApp.ssrContext?.islandContext) {
-          const middlewareEntries = new Set<RouteGuard>([...globalMiddleware, ...nuxtApp._middleware.global])
-
-          const routeRules = getRouteRules({ path: to.path })
-          if (routeRules.appMiddleware) {
-            for (const key in routeRules.appMiddleware) {
-              const guard = nuxtApp._middleware.named[key] as RouteGuard | undefined
-              if (!guard) { continue }
-
-              if (routeRules.appMiddleware[key]) {
-                middlewareEntries.add(guard)
-              } else {
-                middlewareEntries.delete(guard)
-              }
-            }
-          }
-
-          for (const middleware of middlewareEntries) {
-            if (import.meta.dev) {
-              nuxtApp._processingMiddleware = (middleware as any)._path || true
-            }
-            const result = await nuxtApp.runWithContext(() => middleware(to, from))
-            if (import.meta.server) {
-              if (result === false || result instanceof Error) {
-                const error = result || new HTTPError({
-                  status: 404,
-                  statusText: `Page Not Found: ${initialURL}`,
-                  data: {
-                    path: initialURL,
-                  },
-                })
-                delete nuxtApp._processingMiddleware
-                delete nuxtApp._middlewareTo
-                return nuxtApp.runWithContext(() => showError(error))
-              }
-            }
-            if (result === true) { continue }
-            if (result || result === false) { return result }
-          }
-        }
-      })
-
-      router.afterEach(() => {
-        delete nuxtApp._processingMiddleware
-        if (import.meta.server) {
-          delete nuxtApp._middlewareTo
-        }
-      })
-
-      await router.replace(initialURL)
-      if (!isEqual(route.fullPath, initialURL)) {
-        await nuxtApp.runWithContext(() => navigateTo(route.fullPath))
-      }
+        throw new Error("STUB");
     })
 
     return {

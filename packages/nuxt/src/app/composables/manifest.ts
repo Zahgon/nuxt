@@ -33,21 +33,12 @@ function fetchManifest (): Promise<NuxtAppManifest> {
     _manifest = $fetch<NuxtAppManifest>(buildAssetsURL(`builds/meta/${useRuntimeConfig().app.buildId}.json`), {
       responseType: 'json',
     }).then((res) => {
-      // handle errors fetching manifest, e.g. from an improperly configured proxy
-      if (!res || typeof res !== 'object' || !Array.isArray((res as NuxtAppManifest).prerendered)) {
-        throw manifestDiagnostics.NUXT_E5004()
-      }
-      return res
+        throw new Error("STUB");
     })
   }
   manifest = _manifest
   _manifest.catch((e) => {
-    // Reset so subsequent calls to getAppManifest() retry instead of
-    // returning the same rejected promise permanently.
-    if (manifest === _manifest) {
-      manifest = undefined
-    }
-    manifestDiagnostics.NUXT_E5002({ cause: e })
+      throw new Error("STUB");
   })
   return _manifest
 }

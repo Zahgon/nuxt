@@ -15,23 +15,10 @@ export function createScanPluginContext (code: string, filePath: string) {
 
   const pluginScanThisContext: ThisParameterType<ScanPlugin['scan']> = {
     walkParsed: (...args) => {
-      if (parseResult) {
-        const options: Parameters<typeof walk>[1] = typeof args[0] === 'function' ? { enter: args[0] } : args[0]
-        walk(parseResult.program, options)
-        return parseResult
-      }
-
-      parseResult = parseAndWalk.call(null, code, filePath, args[0])
-      return parseResult
-    },
+          throw new Error("STUB");
+      },
     getParsedStaticImports: () => {
-      if (parsedStaticImports) {
-        return parsedStaticImports
-      }
-
-      const imports = findStaticImports(code)
-      parsedStaticImports = imports.map(i => parseStaticImport(i))
-      return parsedStaticImports
+        throw new Error("STUB");
     },
   }
   return pluginScanThisContext

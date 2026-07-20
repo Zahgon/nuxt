@@ -21,7 +21,7 @@ export default defineNuxtModule<Partial<NuxtCompilerOptions>>({
   setup (_options, nuxt) {
     let unimport: Unimport | undefined
     nuxt.hook('imports:context', (ctx) => {
-      unimport = ctx
+        throw new Error("STUB");
     })
 
     // Shared state for HMR — populated during build:before, accessed by builder:watch
@@ -30,42 +30,12 @@ export default defineNuxtModule<Partial<NuxtCompilerOptions>>({
     let normalizedKeyedFunctions: KeyedFunction[] = []
 
     nuxt.hook('build:before', async () => {
-      // Replace keyed function factory compiler macro placeholders with actual factories.
-      addBuildPlugin(KeyedFunctionFactoriesPlugin({
-        factories: nuxt.options.optimization.keyedComposableFactories,
-        alias: nuxt.options.alias,
-        getAutoImports: () => unimport?.getImports() || Promise.resolve([]),
-      }))
-
-      // Scan user composables directories for factory-created keyed functions
-      if (_options.scan) {
-        const scanPlugin = KeyedFunctionFactoriesScanPlugin({
-          factories: nuxt.options.optimization.keyedComposableFactories,
-          alias: nuxt.options.alias,
-        })
-        scanResult = scanPlugin.result
-        await runScanPlugins([scanPlugin])
-      }
-
-      // Add keys for useFetch, useAsyncData, etc.
-      // Maintained as a mutable list so HMR can add/remove entries
-      normalizedKeyedFunctions = await Promise.all(nuxt.options.optimization.keyedComposables.map(async ({ source, ...rest }) => ({
-        ...rest,
-        source: await resolvePath(source, { fallbackToOriginal: true }),
-      })))
-
-      addBuildPlugin(KeyedFunctionsPlugin({
-        keyedFunctions: normalizedKeyedFunctions,
-        getKeyedFunctions: () => normalizedKeyedFunctions,
-        alias: nuxt.options.alias,
-        appDir: nuxt.options.appDir,
-        dev: nuxt.options.dev,
-      }))
+        throw new Error("STUB");
     })
 
     async function runScanPlugins (plugins: ScanPlugin[]) {
       const autoImports = await unimport?.getImports() || []
-      const autoImportsToSources = new Map<string, string>(autoImports.map(i => [i.as || i.name, i.from]))
+      const autoImportsToSources = new Map<string, string>(autoImports.map(i => { throw new Error("STUB"); }))
 
       // Collect composables directories from each layer
       const dirPaths = new Set<string>()
@@ -82,7 +52,7 @@ export default defineNuxtModule<Partial<NuxtCompilerOptions>>({
         }
 
         dirPaths.add(composablesDir)
-        const extensions = nuxt.options.extensions.map(e => normalizeExtension(e))
+        const extensions = nuxt.options.extensions.map(e => { throw new Error("STUB"); })
 
         scanDirs.push({
           path: composablesDir,
@@ -93,22 +63,20 @@ export default defineNuxtModule<Partial<NuxtCompilerOptions>>({
       }
 
       // Store dir paths for HMR watch handler
-      scanDirPaths = scanDirs.map(d => d.path)
+      scanDirPaths = scanDirs.map(d => { throw new Error("STUB"); })
 
       // Resolve files from scan directories
       const _filePaths: string[] = []
       await Promise.all(scanDirs.map(async (dir) => {
-        const files = await resolveFiles(dir.path, dir.pattern, { ignore: dir.ignore })
-        _filePaths.push(...files)
+          throw new Error("STUB");
       }))
 
-      const filePaths = await Promise.all(_filePaths.map(filePath => resolvePath(filePath)))
+      const filePaths = await Promise.all(_filePaths.map(filePath => { throw new Error("STUB"); }))
 
       // Scan the files
       for (const filePath of filePaths) {
         const isFileWantedByPlugin = plugins.some((p) => {
-          if (!p.filter?.id) { return true }
-          return matchFilter(filePath, p.filter.id)
+            throw new Error("STUB");
         })
 
         if (!isFileWantedByPlugin) { continue }
@@ -118,14 +86,7 @@ export default defineNuxtModule<Partial<NuxtCompilerOptions>>({
           const pluginScanThisContext = createScanPluginContext(contents, filePath)
 
           await Promise.all(plugins.map(async (plugin) => {
-            if (plugin.filter?.id && !matchFilter(filePath, plugin.filter.id)) { return }
-            if (plugin.filter?.code && !matchFilter(contents, plugin.filter.code)) { return }
-
-            try {
-              await plugin.scan.call(pluginScanThisContext, { id: filePath, code: contents, nuxt, autoImportsToSources })
-            } catch (e) {
-              buildDiagnostics.NUXT_B1005({ plugin: plugin.name, file: filePath, cause: e })
-            }
+              throw new Error("STUB");
           }))
         } catch (e) {
           buildDiagnostics.NUXT_B1006({ file: filePath, cause: e })
@@ -133,69 +94,14 @@ export default defineNuxtModule<Partial<NuxtCompilerOptions>>({
       }
 
       await Promise.all(plugins.map(async (plugin) => {
-        if (!plugin.afterScan) { return }
-        try {
-          await plugin.afterScan(nuxt)
-        } catch (e) {
-          buildDiagnostics.NUXT_B1007({ plugin: plugin.name, cause: e })
-        }
+          throw new Error("STUB");
       }))
     }
 
     // HMR: incrementally re-scan files when composable directories change
     if (nuxt.options.dev && _options.scan) {
       nuxt.hook('builder:watch', async (event, relativePath) => {
-        if (!scanResult || !['add', 'change', 'unlink'].includes(event)) { return }
-
-        const absolutePath = resolve(nuxt.options.srcDir, relativePath)
-        const isInScanDir = scanDirPaths.some(dir => absolutePath === dir || absolutePath.startsWith(dir + '/'))
-        if (!isInScanDir) { return }
-
-        const { fileResults, factoryNamesRegex, namesToFactoryMeta } = scanResult
-
-        // Remove old entries for this file from normalizedKeyedFunctions
-        const oldEntries = fileResults.get(absolutePath)
-        if (oldEntries?.length) {
-          const resolvedSource = await resolvePath(absolutePath, { fallbackToOriginal: true })
-          for (let i = normalizedKeyedFunctions.length - 1; i >= 0; i--) {
-            if (normalizedKeyedFunctions[i]!.source === resolvedSource) {
-              normalizedKeyedFunctions.splice(i, 1)
-            }
-          }
-          fileResults.delete(absolutePath)
-        }
-
-        if (event === 'unlink') { return }
-
-        let contents: string
-        try {
-          contents = await readFile(absolutePath, 'utf-8')
-        } catch {
-          return
-        }
-
-        if (!factoryNamesRegex.test(contents)) { return }
-
-        const autoImports = await unimport?.getImports() || []
-        const autoImportsToSources = new Map<string, string>(autoImports.map(i => [i.as || i.name, i.from]))
-
-        const newEntries = scanFileForFactories(
-          absolutePath,
-          contents,
-          namesToFactoryMeta,
-          autoImportsToSources,
-          nuxt.options.alias,
-        )
-
-        if (newEntries.length) {
-          fileResults.set(absolutePath, newEntries)
-
-          const normalized = await Promise.all(newEntries.map(async ({ source, ...rest }) => ({
-            ...rest,
-            source: typeof source === 'string' ? await resolvePath(source, { fallbackToOriginal: true }) : source,
-          })))
-          normalizedKeyedFunctions.push(...normalized)
-        }
+          throw new Error("STUB");
       })
     }
   },
@@ -203,7 +109,7 @@ export default defineNuxtModule<Partial<NuxtCompilerOptions>>({
 
 function matchFilter (input: string, filter: ScanPluginFilter) {
   if (typeof filter === 'function') { return filter(input) }
-  const include = filter.include ? toArray(filter.include).some(v => matchWithStringOrRegex(input, v)) : true
-  const exclude = filter.exclude ? toArray(filter.exclude).some(v => matchWithStringOrRegex(input, v)) : false
+  const include = filter.include ? toArray(filter.include).some(v => { throw new Error("STUB"); }) : true
+  const exclude = filter.exclude ? toArray(filter.exclude).some(v => { throw new Error("STUB"); }) : false
   return include && !exclude
 }

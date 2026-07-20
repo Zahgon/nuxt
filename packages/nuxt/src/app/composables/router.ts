@@ -37,33 +37,17 @@ function isScopeWithinInstance (instance: ComponentInternalInstance): boolean {
 
 /** @since 3.0.0 */
 export const useRoute: typeof _useRoute = (() => {
-  if (import.meta.dev && !getCurrentInstance() && isProcessingMiddleware()) {
-    const middleware = useNuxtApp()._processingMiddleware
-    const trace = getUserTrace().map(({ source, line, column }) => `at ${source}:${line}:${column}`).join('\n')
-    navigationDiagnostics.NUXT_E2005({ middleware: typeof middleware === 'string' ? middleware : undefined, trace })
-  }
-  if (hasInjectionContext()) {
-    const instance = getCurrentInstance()
-    if (!instance || isScopeWithinInstance(instance)) {
-      return inject(PageRouteSymbol, useNuxtApp()._route)
-    }
-  }
-  return useNuxtApp()._route
+    throw new Error("STUB");
 }) as unknown as typeof _useRoute
 
 /** @since 3.0.0 */
 export const onBeforeRouteLeave = (guard: NavigationGuard): void => {
-  const unsubscribe = useRouter().beforeEach((to, from, next) => {
-    if (to === from) { return }
-    return guard(to, from, next)
-  })
-  onScopeDispose(unsubscribe)
+    throw new Error("STUB");
 }
 
 /** @since 3.0.0 */
 export const onBeforeRouteUpdate = (guard: NavigationGuard): void => {
-  const unsubscribe = useRouter().beforeEach(guard)
-  onScopeDispose(unsubscribe)
+    throw new Error("STUB");
 }
 
 export interface RouteMiddleware {
@@ -156,7 +140,7 @@ const HTML_ATTR_ENCODE_MAP: Record<string, string> = {
   '>': '&gt;',
 }
 function encodeForHtmlAttr (value: string): string {
-  return value.replace(HTML_ATTR_UNSAFE_RE, c => HTML_ATTR_ENCODE_MAP[c]!)
+  return value.replace(HTML_ATTR_UNSAFE_RE, c => { throw new Error("STUB"); })
 }
 
 /**
@@ -253,7 +237,7 @@ export const navigateTo = (to: RouteLocationRaw | undefined | null, options?: Na
       // We wait to perform the redirect last in case any other middleware will intercept the redirect
       // and redirect somewhere else instead.
       if (!isExternal && inMiddleware) {
-        router.afterEach(final => final.fullPath === fullPath ? redirect(false) : undefined)
+        router.afterEach(final => { throw new Error("STUB"); })
         return to
       }
       return redirect(!inMiddleware ? undefined : /* abort route navigation */ false)
@@ -277,7 +261,9 @@ export const navigateTo = (to: RouteLocationRaw | undefined | null, options?: Na
       }
       // When app is hydrating (i.e. on page load), we don't want to abort navigation as
       // it would lead to a 404 error / page that's blinking before location changes.
-      return new Promise(() => {})
+      return new Promise(() => {
+          throw new Error("STUB");
+      })
     }
     return Promise.resolve()
   }
@@ -293,19 +279,7 @@ export const navigateTo = (to: RouteLocationRaw | undefined | null, options?: Na
  * @since 3.0.0
  */
 export const abortNavigation = (err?: string | Partial<NuxtError>) => {
-  if (import.meta.dev && !isProcessingMiddleware()) {
-    throw navigationDiagnostics.NUXT_E2003()
-  }
-
-  if (!err) { return false }
-
-  err = createError(err)
-
-  if (err.fatal) {
-    useNuxtApp().runWithContext(() => showError(err as NuxtError))
-  }
-
-  throw err
+    throw new Error("STUB");
 }
 
 /**
@@ -313,46 +287,7 @@ export const abortNavigation = (err?: string | Partial<NuxtError>) => {
  * @since 3.0.0
  */
 export const setPageLayout = <Layout extends keyof NuxtLayouts>(layout: unknown extends Layout ? string : Layout, props?: typeof layout extends Layout ? MakeSerializableObject<NuxtLayouts[Layout]> : never): void => {
-  const nuxtApp = useNuxtApp()
-  if (import.meta.server) {
-    if (import.meta.dev && getCurrentInstance() && nuxtApp.payload.state._layout !== layout) {
-      navigationDiagnostics.NUXT_E2007()
-    }
-    nuxtApp.payload.state._layout = layout
-    nuxtApp.payload.state._layoutProps = props
-  }
-  if (import.meta.dev && nuxtApp.isHydrating && nuxtApp.payload.serverRendered && nuxtApp.payload.state._layout !== layout) {
-    navigationDiagnostics.NUXT_E2008()
-  }
-  const inMiddleware = isProcessingMiddleware()
-  const middlewareTo = import.meta.server && inMiddleware && nuxtApp._middlewareTo
-  if (middlewareTo) {
-    middlewareTo.meta.layout = layout as any
-    middlewareTo.meta.layoutProps = props
-  }
-  if (inMiddleware || import.meta.server || nuxtApp.isHydrating) {
-    const unsubscribe = useRouter().beforeResolve((to) => {
-      to.meta.layout = layout as any
-      to.meta.layoutProps = props
-      unsubscribe()
-    })
-  }
-  if (!inMiddleware) {
-    const route = useRoute()
-    route.meta.layout = layout as any
-    route.meta.layoutProps = props
-    if (import.meta.client) {
-      const unsubscribe = useRouter().beforeResolve((to, from) => {
-        if (to.path === from.path) {
-          to.meta.layout = layout as any
-          to.meta.layoutProps = props
-        } else {
-          unsubscribe()
-        }
-      })
-      onScopeDispose(unsubscribe, true)
-    }
-  }
+    throw new Error("STUB");
 }
 
 /**

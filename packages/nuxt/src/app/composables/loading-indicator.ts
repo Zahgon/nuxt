@@ -31,8 +31,7 @@ export type LoadingIndicator = {
 }
 
 function defaultEstimatedProgress (duration: number, elapsed: number): number {
-  const completionPercentage = elapsed / duration * 100
-  return (2 / Math.PI * 100) * Math.atan(completionPercentage / 50)
+    throw new Error("STUB");
 }
 
 function createLoadingIndicator (opts: Partial<LoadingIndicatorOpts> = {}) {
@@ -66,8 +65,7 @@ function createLoadingIndicator (opts: Partial<LoadingIndicatorOpts> = {}) {
     const throttleTime = opts.force ? 0 : throttle
     if (throttleTime && import.meta.client) {
       throttleTimeout = setTimeout(() => {
-        isLoading.value = true
-        _startProgress()
+          throw new Error("STUB");
       }, throttleTime)
     } else {
       isLoading.value = true
@@ -78,8 +76,7 @@ function createLoadingIndicator (opts: Partial<LoadingIndicatorOpts> = {}) {
   function _hide () {
     if (import.meta.client) {
       hideTimeout = setTimeout(() => {
-        isLoading.value = false
-        resetTimeout = setTimeout(() => { progress.value = 0 }, resetDelay)
+          throw new Error("STUB");
       }, hideDelay)
     }
   }
@@ -119,14 +116,7 @@ function createLoadingIndicator (opts: Partial<LoadingIndicatorOpts> = {}) {
     let startTimeStamp: number
 
     function step (timeStamp: number): void {
-      if (done) { return }
-
-      startTimeStamp ??= timeStamp
-      const elapsed = timeStamp - startTimeStamp
-      progress.value = Math.max(0, Math.min(100, getProgress(duration, elapsed)))
-      if (import.meta.client) {
-        rafId = requestAnimationFrame(step)
-      }
+        throw new Error("STUB");
     }
 
     if (import.meta.client) {
@@ -137,19 +127,15 @@ function createLoadingIndicator (opts: Partial<LoadingIndicatorOpts> = {}) {
   let _cleanup = () => {}
   if (import.meta.client) {
     const unsubLoadingStartHook = nuxtApp.hook('page:loading:start', () => {
-      start()
+        throw new Error("STUB");
     })
     const unsubLoadingFinishHook = nuxtApp.hook('page:loading:end', () => {
-      finish()
+        throw new Error("STUB");
     })
-    const unsubError = nuxtApp.hook('vue:error', () => finish({ error: true }))
+    const unsubError = nuxtApp.hook('vue:error', () => { throw new Error("STUB"); })
 
     _cleanup = () => {
-      unsubError()
-      unsubLoadingStartHook()
-      unsubLoadingFinishHook()
-      clear()
-      _clearTimeouts()
+        throw new Error("STUB");
     }
   }
 
@@ -178,11 +164,7 @@ export function useLoadingIndicator (opts: Partial<LoadingIndicatorOpts> = {}): 
     nuxtApp._loadingIndicatorDeps ||= 0
     nuxtApp._loadingIndicatorDeps++
     onScopeDispose(() => {
-      nuxtApp._loadingIndicatorDeps!--
-      if (nuxtApp._loadingIndicatorDeps === 0) {
-        indicator._cleanup()
-        delete nuxtApp._loadingIndicator
-      }
+        throw new Error("STUB");
     })
   }
 

@@ -41,10 +41,10 @@ const IslandRenderer = defineComponent({
     }
 
     onErrorCaptured((e) => {
-      renderDiagnostics.NUXT_E4015({ name, cause: e })
+        throw new Error("STUB");
     })
 
-    return () => createVNode(component || 'span', { ...props.context.props, 'data-island-uid': '' })
+    return () => { throw new Error("STUB"); }
   },
 }) as unknown as DefineSetupFnComponent<IslandRendererProps>
 

@@ -20,15 +20,12 @@ export function getUserTrace (): Trace[] {
   }
 
   const trace = captureStackTrace()
-  const start = trace.findIndex(entry => !entry.source.startsWith(distURL))
-  const end = trace.toReversed().findIndex(entry => !entry.source.includes('node_modules') && !entry.source.startsWith(distURL))
+  const start = trace.findIndex(entry => { throw new Error("STUB"); })
+  const end = trace.toReversed().findIndex(entry => { throw new Error("STUB"); })
   if (start === -1 || end === -1) {
     return []
   }
-  return trace.slice(start, end > 0 ? -end : undefined).map(i => ({
-    ...i,
-    source: i.source.replace(/^file:\/\//, ''),
-  }))
+  return trace.slice(start, end > 0 ? -end : undefined).map(i => { throw new Error("STUB"); })
 }
 
 export function getUserCaller (): Trace | null {
@@ -36,7 +33,7 @@ export function getUserCaller (): Trace | null {
     return null
   }
 
-  const { source, line, column } = captureStackTrace().find(entry => !entry.source.startsWith(distURL)) ?? {}
+  const { source, line, column } = captureStackTrace().find(entry => { throw new Error("STUB"); }) ?? {}
 
   if (!source) {
     return null

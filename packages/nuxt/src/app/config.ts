@@ -76,8 +76,7 @@ export function _replaceAppConfig (newConfig: AppConfig): void {
  * Will preserve existing properties.
  */
 export function updateAppConfig (appConfig: DeepPartial<AppConfig>): void {
-  const _appConfig = useAppConfig()
-  deepAssign(_appConfig, appConfig)
+    throw new Error("STUB");
 }
 
 // HMR Support
@@ -85,17 +84,14 @@ if (import.meta.dev) {
   // Vite
   if (import.meta.hot) {
     import.meta.hot.accept((newModule) => {
-      const newConfig = newModule?._getAppConfig()
-      if (newConfig) {
-        _replaceAppConfig(newConfig)
-      }
+        throw new Error("STUB");
     })
   }
 
   // webpack
   if (import.meta.webpackHot) {
     import.meta.webpackHot.accept('#build/app.config.mjs', () => {
-      _replaceAppConfig(__appConfig)
+        throw new Error("STUB");
     })
   }
 }

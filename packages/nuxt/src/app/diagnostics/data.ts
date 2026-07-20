@@ -12,7 +12,7 @@ export const dataDiagnostics = !import.meta.dev
       reporters,
       codes: {
         NUXT_E3001: {
-          why: (p: { url: string }) => `The \`useFetch\` request URL must not start with "//" (received \`${p.url}\`).`,
+          why: (p: { url: string }) => { throw new Error("STUB"); },
           fix: 'Use an absolute URL with a protocol or a relative path instead.',
         },
         NUXT_E3002: {
@@ -26,7 +26,7 @@ export const dataDiagnostics = !import.meta.dev
           docs: false,
         },
         NUXT_E3004: {
-          why: (p: { key: string, warnings: string }) => `Incompatible options detected for "${p.key}":\n${p.warnings}`,
+          why: (p: { key: string, warnings: string }) => { throw new Error("STUB"); },
           fix: 'You can use a different key or move the call to a composable to ensure the options are shared across calls.',
           docs: false,
         },
@@ -36,7 +36,7 @@ export const dataDiagnostics = !import.meta.dev
           docs: false,
         },
         NUXT_E3006: {
-          why: (p: { fn: string }) => `\`${p.fn}\` handler returned \`undefined\`, so the request may be duplicated on the client side.`,
+          why: (p: { fn: string }) => { throw new Error("STUB"); },
           fix: 'Return a value from the handler function (e.g. `return null` instead of returning nothing).',
           docs: false,
         },

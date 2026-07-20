@@ -12,40 +12,13 @@ import { devLogs, devRootDir } from '#build/nuxt.config.mjs'
 const devRevivers: Record<string, (data: any) => any> = import.meta.server
   ? {}
   : {
-      VNode: data => h(data.type, data.props),
-      URL: data => new URL(data),
-      Symbol: data => Symbol.for(data),
+      VNode: data => { throw new Error("STUB"); },
+      URL: data => { throw new Error("STUB"); },
+      Symbol: data => { throw new Error("STUB"); },
     }
 
 const plugin: Plugin & ObjectPlugin = defineNuxtPlugin(async (nuxtApp) => {
-  if (import.meta.test) { return }
-
-  if (import.meta.server) {
-    nuxtApp.ssrContext!.event.context['~payloadReducers'] = nuxtApp.ssrContext!['~payloadReducers']
-    return
-  }
-
-  // Show things in console
-  if (devLogs !== 'silent') {
-    const logger = createConsola({
-      formatOptions: {
-        colors: true,
-        date: true,
-      },
-    })
-    nuxtApp.hook('dev:ssr-logs', (logs) => {
-      for (const log of logs) {
-        logger.log(normalizeServerLog({ ...log }))
-      }
-    })
-  }
-
-  if (typeof window !== 'undefined') {
-    const nuxtLogsElement = document.querySelector(`[data-nuxt-logs="${nuxtApp._id}"]`)
-    const content = nuxtLogsElement?.textContent
-    const logs = content ? parse(content, { ...devRevivers, ...nuxtApp._payloadRevivers }) as LogObject[] : []
-    await nuxtApp.hooks.callHook('dev:ssr-logs', logs)
-  }
+    throw new Error("STUB");
 })
 
 function normalizeFilenames (stack?: ParsedTrace[]) {

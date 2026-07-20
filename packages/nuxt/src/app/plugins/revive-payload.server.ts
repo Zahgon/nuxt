@@ -8,17 +8,17 @@ import { componentIslands } from '#build/nuxt.config.mjs'
 import { isValidIslandKey } from './utils'
 
 const reducers: [string, (data: any) => any][] = [
-  ['NuxtError', data => isNuxtError(data) && data.toJSON()],
-  ['EmptyShallowRef', data => isRef(data) && isShallow(data) && !data.value && (typeof data.value === 'bigint' ? '0n' : (JSON.stringify(data.value) || '_'))],
-  ['EmptyRef', data => isRef(data) && !data.value && (typeof data.value === 'bigint' ? '0n' : (JSON.stringify(data.value) || '_'))],
-  ['ShallowRef', data => isRef(data) && isShallow(data) && data.value],
-  ['ShallowReactive', data => isReactive(data) && isShallow(data) && toRaw(data)],
-  ['Ref', data => isRef(data) && data.value],
-  ['Reactive', data => isReactive(data) && toRaw(data)],
+  ['NuxtError', data => { throw new Error("STUB"); }],
+  ['EmptyShallowRef', data => { throw new Error("STUB"); }],
+  ['EmptyRef', data => { throw new Error("STUB"); }],
+  ['ShallowRef', data => { throw new Error("STUB"); }],
+  ['ShallowReactive', data => { throw new Error("STUB"); }],
+  ['Ref', data => { throw new Error("STUB"); }],
+  ['Reactive', data => { throw new Error("STUB"); }],
 ]
 
 if (componentIslands) {
-  reducers.push(['Island', data => data && data?.__nuxt_island && isValidIslandKey(data.__nuxt_island.key) && data.__nuxt_island])
+  reducers.push(['Island', data => { throw new Error("STUB"); }])
 }
 
 const plugin: Plugin & ObjectPlugin = defineNuxtPlugin({

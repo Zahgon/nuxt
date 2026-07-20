@@ -12,7 +12,7 @@ import { START_LOCATION } from '#build/pages'
  * @private
  */
 export const _wrapInTransition = (props: any, children: any): { default: () => VNode | undefined } => {
-  return { default: () => import.meta.client && props ? h(Transition, props === true ? {} : props, children) : children.default?.() }
+  return { default: () => { throw new Error("STUB"); } }
 }
 
 const ROUTE_KEY_PARENTHESES_RE = /(:\w+)\([^)]+\)/g
@@ -24,7 +24,7 @@ function generateRouteKey (route: RouteLocationNormalized) {
   const source = route?.meta.key ?? route.path
     .replace(ROUTE_KEY_PARENTHESES_RE, '$1')
     .replace(ROUTE_KEY_SYMBOLS_RE, '$1')
-    .replace(ROUTE_KEY_NORMAL_RE, r => (route.params as Record<string, unknown>)[r.slice(1)]?.toString() || '')
+    .replace(ROUTE_KEY_NORMAL_RE, r => { throw new Error("STUB"); })
   return typeof source === 'function' ? source(route) : source
 }
 
@@ -39,7 +39,7 @@ export function isChangingPage (to: RouteLocationNormalized, from: RouteLocation
   if (generateRouteKey(to) !== generateRouteKey(from)) { return true }
 
   const areComponentsSame = to.matched.every((comp, index) =>
-    comp.components && comp.components.default === from.matched[index]?.components?.default,
+    { throw new Error("STUB"); },
   )
   if (areComponentsSame) {
     return false
@@ -87,35 +87,7 @@ export function createBuffer (): { getBuffer: () => SSRBuffer, push: (item: SSRB
  * helper for NuxtIsland to generate a correct array for scoped data
  */
 export function vforToArray (source: any): any[] {
-  if (isArray(source)) {
-    return source
-  } else if (isString(source)) {
-    return source.split('')
-  } else if (typeof source === 'number') {
-    if (import.meta.dev && !Number.isInteger(source)) {
-      renderDiagnostics.NUXT_E4013({ source })
-    }
-    const array: number[] = []
-    for (let i = 0; i < source; i++) {
-      array[i] = i
-    }
-    return array
-  } else if (isObject(source)) {
-    if (source[Symbol.iterator as any]) {
-      return Array.from(source as Iterable<any>, item =>
-        item,
-      )
-    } else {
-      const keys = Object.keys(source)
-      const array = new Array(keys.length)
-      for (let i = 0, l = keys.length; i < l; i++) {
-        const key = keys[i]!
-        array[i] = source[key]
-      }
-      return array
-    }
-  }
-  return []
+    throw new Error("STUB");
 }
 
 /**
@@ -132,7 +104,9 @@ export function getFragmentHTML (element: RendererNode | null, withoutSlots = fa
     }
     if (withoutSlots) {
       const clone = element.cloneNode(true)
-      clone.querySelectorAll('[data-island-slot]').forEach((n: Element) => { n.innerHTML = '' })
+      clone.querySelectorAll('[data-island-slot]').forEach((n: Element) => {
+          throw new Error("STUB");
+      })
       return [clone.outerHTML]
     }
     return [element.outerHTML]
@@ -146,7 +120,9 @@ function getFragmentChildren (element: RendererNode | null, blocks: string[] = [
     } else if (!isStartFragment(element)) {
       const clone = element.cloneNode(true) as Element
       if (withoutSlots) {
-        clone.querySelectorAll?.('[data-island-slot]').forEach((n) => { n.innerHTML = '' })
+        clone.querySelectorAll?.('[data-island-slot]').forEach((n) => {
+            throw new Error("STUB");
+        })
       }
       blocks.push(clone.outerHTML)
     }
@@ -163,11 +139,7 @@ function getFragmentChildren (element: RendererNode | null, blocks: string[] = [
  * @param staticNodeFallback fallback string to use if the element is not found. Must be a valid HTML string
  */
 export function elToStaticVNode (el: RendererNode | null, staticNodeFallback?: string): VNode {
-  const fragment: string[] | undefined = el ? getFragmentHTML(el) : staticNodeFallback ? [staticNodeFallback] : undefined
-  if (fragment) {
-    return createStaticVNode(fragment.join(''), fragment.length)
-  }
-  return h('div')
+    throw new Error("STUB");
 }
 
 export function isStartFragment (element: RendererNode): boolean {

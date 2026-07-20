@@ -15,16 +15,9 @@ export async function getVueHash (nuxt: Nuxt) {
 
   const { hash } = await getHashes(nuxt, {
     id,
-    cwd: layer => layer.config.srcDir || layer.cwd,
+    cwd: layer => { throw new Error("STUB"); },
     patterns: (layer) => {
-      const srcDir = layer.config.srcDir || layer.cwd
-      return [
-        '**',
-        `!${relative(srcDir, layer.config.serverDir || join(layer.cwd, 'server'))}/**`,
-        `!${relative(srcDir, resolve(layer.cwd, layer.config.dir?.public || 'public'))}/**`,
-        '!node_modules/**',
-        '!nuxt.config.*',
-      ]
+        throw new Error("STUB");
     },
     configOverrides: {
       buildId: undefined,
@@ -75,22 +68,7 @@ export async function getVueHash (nuxt: Nuxt) {
  * consumers use the same buildId that was used when the Vue build was cached.
  */
 export async function restoreCachedBuildId (nuxt: Nuxt) {
-  const { hash } = await getVueHash(nuxt)
-  const cacheDir = getCacheDir(nuxt)
-  const buildIdCacheFile = join(cacheDir, 'vue', hash + '.buildid')
-
-  if (!existsSync(buildIdCacheFile)) {
-    return
-  }
-
-  const cachedBuildId = (await readFile(buildIdCacheFile, 'utf-8')).trim()
-  if (!cachedBuildId || !/^[\w-]+$/.test(cachedBuildId)) {
-    return
-  }
-
-  nuxt.options.buildId = cachedBuildId
-  nuxt.options.runtimeConfig.app.buildId = cachedBuildId
-  consola.debug(`Restored cached buildId: ${cachedBuildId}`)
+    throw new Error("STUB");
 }
 
 export async function cleanupCaches (nuxt: Nuxt) {
@@ -101,9 +79,9 @@ export async function cleanupCaches (nuxt: Nuxt) {
   })
   if (caches.length >= 10) {
     const cachesWithMeta = await Promise.all(caches.map(async (cache) => {
-      return [cache, await stat(cache).then(r => r.mtime.getTime()).catch(() => 0)] as const
+        throw new Error("STUB");
     }))
-    cachesWithMeta.sort((a, b) => a[1] - b[1])
+    cachesWithMeta.sort((a, b) => { throw new Error("STUB"); })
     for (const [cache] of cachesWithMeta.slice(0, cachesWithMeta.length - 10)) {
       await unlink(cache)
     }
@@ -146,11 +124,7 @@ async function getHashes (nuxt: Nuxt, options: GetHashOptions): Promise<Hashes> 
       }),
     })
 
-    const normalizeFiles = (files: Awaited<ReturnType<typeof readFilesRecursive>>) => files.map(f => ({
-      name: f.name,
-      size: f.attrs?.size,
-      data: hash(f.data),
-    })).sort((a, b) => a.name.localeCompare(b.name))
+    const normalizeFiles = (files: Awaited<ReturnType<typeof readFilesRecursive>>) => files.map(f => { throw new Error("STUB"); }).sort((a, b) => { throw new Error("STUB"); })
 
     const isIgnored = createIsIgnored(nuxt)
     const sourceFiles = await readFilesRecursive(options.cwd(layer), {
@@ -186,7 +160,7 @@ async function getHashes (nuxt: Nuxt, options: GetHashOptions): Promise<Hashes> 
     })
   }
 
-  hashSources.sort((a, b) => a.name.localeCompare(b.name))
+  hashSources.sort((a, b) => { throw new Error("STUB"); })
 
   const res = ((nuxt as any)[`_${options.id}BuildHash`] = {
     hash: hash(hashSources),
@@ -214,20 +188,13 @@ interface ReadFilesRecursiveOptions {
 
 async function readFilesRecursive (dir: string | string[], opts: ReadFilesRecursiveOptions): Promise<FileWithMeta[]> {
   if (Array.isArray(dir)) {
-    return (await Promise.all(dir.map(d => readFilesRecursive(d, opts)))).flat()
+    return (await Promise.all(dir.map(d => { throw new Error("STUB"); }))).flat()
   }
 
   const files = await glob(opts.patterns, { cwd: dir })
 
   const fileEntries = await Promise.all(files.map(async (fileName) => {
-    if (!opts.shouldIgnore?.(fileName)) {
-      const file = await readFileWithMeta(dir, fileName)
-      if (!file) { return }
-      return {
-        ...file,
-        name: relative(opts.cwd, join(dir, file.name)),
-      }
-    }
+      throw new Error("STUB");
   }))
 
   return fileEntries.filter(Boolean) as FileWithMeta[]
@@ -292,7 +259,7 @@ async function restoreCacheFromFile (cwd: string, cacheFile: string) {
       await mkdir(dirname(filePath), { recursive: true })
 
       // Stat before open('w') since it truncates the file
-      const existingStats = await stat(filePath).catch(() => null)
+      const existingStats = await stat(filePath).catch(() => { throw new Error("STUB"); })
       const cachedSize = file.data?.byteLength ?? 0
       if (existingStats?.isFile() && existingStats.size === cachedSize) {
         const lastModified = Number.parseInt(file.attrs?.mtime?.toString().padEnd(13, '0') || '0')
@@ -326,7 +293,7 @@ async function writeCache (cwd: string, sources: string | string[], cacheFile: s
 function getCacheDir (nuxt: Nuxt) {
   let cacheDir = join(nuxt.options.workspaceDir, 'node_modules')
   if (!existsSync(cacheDir)) {
-    for (const dir of nuxt.options.modulesDir.toSorted((a, b) => a.length - b.length)) {
+    for (const dir of nuxt.options.modulesDir.toSorted((a, b) => { throw new Error("STUB"); })) {
       if (existsSync(dir)) {
         cacheDir = dir
         break

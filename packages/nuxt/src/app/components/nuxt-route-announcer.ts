@@ -28,42 +28,14 @@ const NuxtRouteAnnouncer = defineComponent({
     const { set, polite, assertive, message, politeness } = useRouteAnnouncer({ politeness: props.politeness })
 
     const role = computed(() => {
-      if (politeness.value === 'assertive') {
-        return 'alert'
-      }
-      if (politeness.value === 'off') {
-        return undefined
-      }
-      return 'status'
+        throw new Error("STUB");
     })
 
     expose({
       set, polite, assertive, message, politeness,
     })
 
-    return () => h('span', {
-      class: 'nuxt-route-announcer',
-      style: {
-        position: 'absolute',
-      },
-    }, h('span', {
-      'role': role.value,
-      'aria-live': politeness.value,
-      'aria-atomic': props.atomic,
-      'style': {
-        'border': '0',
-        'clip': 'rect(0 0 0 0)',
-        'clip-path': 'inset(50%)',
-        'height': '1px',
-        'width': '1px',
-        'overflow': 'hidden',
-        'position': 'absolute',
-        'white-space': 'nowrap',
-        'word-wrap': 'normal',
-        'margin': '-1px',
-        'padding': '0',
-      },
-    }, slots.default ? slots.default({ message: message.value }) : message.value))
+    return () => { throw new Error("STUB"); }
   },
 }) as unknown as DefineSetupFnComponent<NuxtRouteAnnouncerProps, {}, NuxtRouteAnnouncerSlots>
 

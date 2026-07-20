@@ -30,156 +30,21 @@ interface LoaderOptions {
 const REPLACE_COMPONENT_TO_DIRECT_IMPORT_RE = /(?<=[\s(=;])_?resolveComponent\d*\s*\(\s*(?<quote>["'`])(?<lazy>lazy-|Lazy(?=[A-Z]))?(?<modifier>Idle|Visible|idle-|visible-|Interaction|interaction-|MediaQuery|media-query-|If|if-|Never|never-|Time|time-)?(?<name>[^'"`]*)\k<quote>[^)]*\)|(?<=\bh\s*\(\s*)(?<hLazy>lazy-|Lazy(?=[A-Z]))?(?<hModifier>Idle|Visible|idle-|visible-|Interaction|interaction-|MediaQuery|media-query-|If|if-|Never|never-|Time|time-)?(?<hName>[A-Z][\w$]*)\b/g
 
 export const LoaderPlugin = (options: LoaderOptions) => createUnplugin(() => {
-  const exclude = options.transform?.exclude || []
-  const include = options.transform?.include || []
-  const nuxt = tryUseNuxt()
-
-  return {
-    name: 'nuxt:components-loader',
-    enforce: 'post',
-    transformInclude (id) {
-      if (exclude.some(pattern => pattern.test(id))) {
-        return false
-      }
-      if (include.some(pattern => pattern.test(id))) {
-        return true
-      }
-      return isVue(id, { type: ['template', 'script'] }) || !!id.match(SX_RE)
-    },
-    transform (code, id, meta?: unknown) {
-      const components = options.getComponents()
-
-      let num = 0
-      const imports = new Set<string>()
-      const map = new Map<Component, string>()
-      const s = rolldownString(code, id, meta)
-      // replace `_resolveComponent("...")` to direct import
-      for (const match of code.matchAll(REPLACE_COMPONENT_TO_DIRECT_IMPORT_RE)) {
-        const groups = match.groups!
-        const lazy = groups.hLazy || groups.lazy
-        const modifier = groups.hModifier || groups.modifier
-        const name = groups.hName || groups.name
-        const normalComponent = findComponent(components, name!, options.mode)
-        const modifierComponent = !normalComponent && modifier ? findComponent(components, modifier + name, options.mode) : null
-        const component = normalComponent || modifierComponent
-
-        if (component) {
-          // TODO: refactor to @nuxt/cli
-          const internalInstall = ((component as any)._internal_install) as string
-          if (internalInstall && nuxt?.options.test === false) {
-            if (!nuxt.options.dev) {
-              throw componentDiagnostics.NUXT_B3004({ file: resolveToAlias(id, nuxt), component: component.pascalName, requiredModule: internalInstall })
-            }
-            installNuxtModule(internalInstall)
-          }
-          let identifier = map.get(component) || `__nuxt_component_${num++}`
-          map.set(component, identifier)
-
-          const isServerOnly = !component._raw && component.mode === 'server' &&
-            !components.some(c => c.pascalName === component.pascalName && c.mode === 'client')
-          if (isServerOnly) {
-            imports.add(genImport(options.serverComponentRuntime, [{ name: 'createServerComponent' }]))
-            imports.add(`const ${identifier} = createServerComponent(${JSON.stringify(component.pascalName)})`)
-            if (!options.experimentalComponentIslands) {
-              componentDiagnostics.NUXT_B3003({ component: name! })
-            }
-            s.overwrite(match.index, match.index + match[0].length, identifier)
-            continue
-          }
-
-          const isClientOnly = !component._raw && component.mode === 'client'
-          if (isClientOnly) {
-            imports.add(genImport('#app/components/client-only', [{ name: 'createClientOnly' }]))
-            identifier += '_client'
-          }
-
-          if (lazy) {
-            const dynamicImport = `${genDynamicImport(component.filePath, { interopDefault: false })}.then(c => c.${component.export ?? 'default'} || c)`
-            if (modifier && normalComponent) {
-              const relativePath = relative(options.srcDir, component.filePath)
-              switch (modifier) {
-                case 'Visible':
-                case 'visible-':
-                  imports.add(genImport(options.clientDelayedComponentRuntime, [{ name: 'createLazyVisibleComponent' }]))
-                  identifier += '_lazy_visible'
-                  imports.add(`const ${identifier} = createLazyVisibleComponent(${JSON.stringify(relativePath)}, ${dynamicImport})`)
-                  break
-                case 'Interaction':
-                case 'interaction-':
-                  imports.add(genImport(options.clientDelayedComponentRuntime, [{ name: 'createLazyInteractionComponent' }]))
-                  identifier += '_lazy_event'
-                  imports.add(`const ${identifier} = createLazyInteractionComponent(${JSON.stringify(relativePath)}, ${dynamicImport})`)
-                  break
-                case 'Idle':
-                case 'idle-':
-                  imports.add(genImport(options.clientDelayedComponentRuntime, [{ name: 'createLazyIdleComponent' }]))
-                  identifier += '_lazy_idle'
-                  imports.add(`const ${identifier} = createLazyIdleComponent(${JSON.stringify(relativePath)}, ${dynamicImport})`)
-                  break
-                case 'MediaQuery':
-                case 'media-query-':
-                  imports.add(genImport(options.clientDelayedComponentRuntime, [{ name: 'createLazyMediaQueryComponent' }]))
-                  identifier += '_lazy_media'
-                  imports.add(`const ${identifier} = createLazyMediaQueryComponent(${JSON.stringify(relativePath)}, ${dynamicImport})`)
-                  break
-                case 'If':
-                case 'if-':
-                  imports.add(genImport(options.clientDelayedComponentRuntime, [{ name: 'createLazyIfComponent' }]))
-                  identifier += '_lazy_if'
-                  imports.add(`const ${identifier} = createLazyIfComponent(${JSON.stringify(relativePath)}, ${dynamicImport})`)
-                  break
-                case 'Never':
-                case 'never-':
-                  imports.add(genImport(options.clientDelayedComponentRuntime, [{ name: 'createLazyNeverComponent' }]))
-                  identifier += '_lazy_never'
-                  imports.add(`const ${identifier} = createLazyNeverComponent(${JSON.stringify(relativePath)}, ${dynamicImport})`)
-                  break
-                case 'Time':
-                case 'time-':
-                  imports.add(genImport(options.clientDelayedComponentRuntime, [{ name: 'createLazyTimeComponent' }]))
-                  identifier += '_lazy_time'
-                  imports.add(`const ${identifier} = createLazyTimeComponent(${JSON.stringify(relativePath)}, ${dynamicImport})`)
-                  break
-              }
-            } else {
-              imports.add(genImport('vue', [{ name: 'defineAsyncComponent', as: '__defineAsyncComponent' }]))
-              identifier += '_lazy'
-              imports.add(`const ${identifier} = __defineAsyncComponent(${dynamicImport}${isClientOnly ? '.then(c => createClientOnly(c))' : ''})`)
-            }
-          } else {
-            imports.add(genImport(component.filePath, [{ name: component._raw ? 'default' : component.export, as: identifier }]))
-
-            if (isClientOnly) {
-              imports.add(`const ${identifier}_wrapped = createClientOnly(${identifier})`)
-              identifier += '_wrapped'
-            }
-          }
-
-          s.overwrite(match.index, match.index + match[0].length, identifier)
-        }
-      }
-
-      if (imports.size) {
-        s.prepend([...imports, ''].join('\n'))
-      }
-
-      return generateTransform(s, id)
-    },
-  }
+    throw new Error("STUB");
 })
 
 function findComponent (components: Component[], name: string, mode: LoaderOptions['mode']) {
   const id = pascalCase(name).replace(QUOTE_RE, '')
   // Prefer exact match
   const validModes = new Set(['all', mode, undefined])
-  const component = components.find(component => id === component.pascalName && validModes.has(component.mode))
+  const component = components.find(component => { throw new Error("STUB"); })
   if (component) { return component }
 
-  const otherModeComponent = components.find(component => id === component.pascalName)
+  const otherModeComponent = components.find(component => { throw new Error("STUB"); })
 
   // Render client-only components on the server with <ServerPlaceholder>
   if (mode === 'server' && otherModeComponent) {
-    return components.find(c => c.pascalName === 'ServerPlaceholder')
+    return components.find(c => { throw new Error("STUB"); })
   }
 
   // Return the other-mode component in all other cases - we'll handle createClientOnly

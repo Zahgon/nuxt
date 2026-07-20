@@ -17,9 +17,9 @@ const DevOnly = defineComponent({
   }),
   setup (_, props) {
     if (import.meta.dev) {
-      return () => props.slots.default?.()
+      return () => { throw new Error("STUB"); }
     }
-    return () => props.slots.fallback?.()
+    return () => { throw new Error("STUB"); }
   },
 }) as unknown as DefineSetupFnComponent<{}, {}, DevOnlySlots>
 

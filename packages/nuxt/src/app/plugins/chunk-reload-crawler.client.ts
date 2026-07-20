@@ -11,12 +11,12 @@ const plugin: Plugin & ObjectPlugin = defineNuxtPlugin({
   name: 'nuxt:chunk-reload-crawler',
   setup (nuxtApp) {
     let isHydrating = true
-    nuxtApp.hooks.hookOnce('app:suspense:resolve', () => { isHydrating = false })
+    nuxtApp.hooks.hookOnce('app:suspense:resolve', () => {
+        throw new Error("STUB");
+    })
 
     nuxtApp.hook('app:chunkError', () => {
-      if (isHydrating && isBotUserAgent(navigator.userAgent)) {
-        reloadNuxtApp()
-      }
+        throw new Error("STUB");
     })
   },
 })

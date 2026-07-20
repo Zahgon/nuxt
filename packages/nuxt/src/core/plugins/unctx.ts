@@ -12,39 +12,4 @@ interface UnctxTransformPluginOptions {
   transformerOptions: TransformerOptions
 }
 
-export const UnctxTransformPlugin = (options: UnctxTransformPluginOptions) => createUnplugin(() => {
-  let transformer: Promise<Transformer> | undefined
-  const filter = getTransformFilter(options.transformerOptions)
-
-  return {
-    name: 'unctx:transform',
-    enforce: 'post',
-    transformInclude (id) {
-      return isVue(id, { type: ['template', 'script'] }) || isJS(id)
-    },
-    transform: {
-      filter: {
-        ...filter,
-        code: {
-          include: filter.code,
-          exclude: TRANSFORM_MARKER_RE,
-        },
-      },
-      async handler (code) {
-        const { shouldTransform, transform } = await (transformer ??= createTransformer(options.transformerOptions))
-        // TODO: needed for webpack - update transform in unctx/unplugin?
-        if (!shouldTransform(code)) { return }
-        const result = transform(code)
-        if (result) {
-          result.magicString.prepend(TRANSFORM_MARKER)
-          return {
-            code: result.magicString.toString(),
-            map: options.sourcemap
-              ? result.magicString.generateMap({ hires: true })
-              : undefined,
-          }
-        }
-      },
-    },
-  }
-})
+export const UnctxTransformPlugin = (options: UnctxTransformPluginOptions) => { throw new Error("STUB"); }

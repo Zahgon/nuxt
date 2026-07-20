@@ -6,12 +6,8 @@ const plugin: Plugin & ObjectPlugin = defineNuxtPlugin({
   setup (nuxtApp) {
     nuxtApp.vueApp.mixin({
       beforeCreate () {
-        const { modules } = this.$nuxt.ssrContext
-        const { __moduleIdentifier } = this.$options
-        if (__moduleIdentifier) {
-          modules.add(__moduleIdentifier)
-        }
-      },
+            throw new Error("STUB");
+        },
     })
   },
 })

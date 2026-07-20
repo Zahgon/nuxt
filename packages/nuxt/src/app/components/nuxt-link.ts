@@ -28,7 +28,7 @@ import { nuxtLinkDefaults } from '#build/nuxt.config.mjs'
 import { hashMode } from '#build/router.options.mjs'
 import type { NuxtLinkOptions } from '../types'
 
-const firstNonUndefined = <T> (...args: (T | undefined)[]) => args.find(arg => arg !== undefined)
+const firstNonUndefined = <T> (...args: (T | undefined)[]) => args.find(arg => { throw new Error("STUB"); })
 
 /**
  * Reject URL strings that would resolve to a script-capable protocol when used as the
@@ -197,12 +197,11 @@ export function defineNuxtLink (options: NuxtLinkOptions): NuxtLinkComponent & R
     const router = useRouter()
     const config = useRuntimeConfig()
 
-    const hasTarget = computed(() => !!unref(props.target) && unref(props.target) !== '_self')
+    const hasTarget = computed(() => { throw new Error("STUB"); })
 
     // Lazily check whether to.value has a protocol
     const isAbsoluteUrl = computed(() => {
-      const path = unref(props.to) || unref(props.href) || ''
-      return typeof path === 'string' && hasProtocol(path, { acceptRelative: true })
+        throw new Error("STUB");
     })
 
     const builtinRouterLink = resolveComponent('RouterLink') as string | typeof RouterLink
@@ -210,52 +209,19 @@ export function defineNuxtLink (options: NuxtLinkOptions): NuxtLinkComponent & R
 
     // Resolving link type
     const isExternal = computed<boolean>(() => {
-      // External prop is explicitly set
-      if (unref(props.external)) {
-        return true
-      }
-
-      const path = unref(props.to) || unref(props.href) || ''
-
-      // When `to` is a route object then it's an internal link
-      if (typeof path === 'object') {
-        return false
-      }
-
-      return path === '' || isAbsoluteUrl.value
+        throw new Error("STUB");
     })
 
     // Resolving `to` value from `to` and `href` props
     const to: ComputedRef<RouteLocationRaw> = computed(() => {
-      checkPropConflicts(props as NuxtLinkProps, 'to', 'href')
-      const path = unref(props.to) || unref(props.href) || '' // Defaults to empty string (won't render any `href` attribute)
-      if (isExternal.value) { return path }
-      return resolveTrailingSlashBehavior(path, router.resolve, unref(props.trailingSlash))
+        throw new Error("STUB");
     })
 
     const link = isExternal.value ? undefined : useBuiltinLink?.({ ...props, to, viewTransition: unref(props.viewTransition) })
 
     // Resolves `to` value if it's a route location object
     const href = computed(() => {
-      const effectiveTrailingSlash = unref(props.trailingSlash) ?? options.trailingSlash
-      if (!to.value || isAbsoluteUrl.value || isHashLinkWithoutHashMode(to.value)) {
-        const raw = to.value as string
-        return typeof raw === 'string' ? sanitizeExternalHref(raw) : raw
-      }
-
-      if (isExternal.value) {
-        const path = typeof to.value === 'object' && 'path' in to.value ? resolveRouteObject(to.value) : to.value
-        // separately resolve route objects with a 'name' property and without 'path'
-        const href = typeof path === 'object' ? router.resolve(path).href : path
-        const safe = typeof href === 'string' ? sanitizeExternalHref(href) : href
-        return safe === null ? null : applyTrailingSlashBehavior(safe, effectiveTrailingSlash)
-      }
-
-      if (typeof to.value === 'object') {
-        return router.resolve(to.value)?.href ?? null
-      }
-
-      return applyTrailingSlashBehavior(joinURL(config.app.baseURL, to.value), effectiveTrailingSlash)
+        throw new Error("STUB");
     })
 
     return {
@@ -265,9 +231,9 @@ export function defineNuxtLink (options: NuxtLinkOptions): NuxtLinkComponent & R
       isExternal,
       //
       href,
-      isActive: link?.isActive ?? computed(() => to.value === router.currentRoute.value.path),
-      isExactActive: link?.isExactActive ?? computed(() => to.value === router.currentRoute.value.path),
-      route: link?.route ?? computed(() => router.resolve(to.value)),
+      isActive: link?.isActive ?? computed(() => { throw new Error("STUB"); }),
+      isExactActive: link?.isExactActive ?? computed(() => { throw new Error("STUB"); }),
+      route: link?.route ?? computed(() => { throw new Error("STUB"); }),
       async navigate (_e?: MouseEvent) {
         if (href.value === null) {
           if (import.meta.dev) {
@@ -393,7 +359,9 @@ export function defineNuxtLink (options: NuxtLinkOptions): NuxtLinkComponent & R
       // Prefetching
       const prefetched = shallowRef(false)
       const el = import.meta.server ? undefined : ref<HTMLElement | null>(null)
-      const elRef = import.meta.server ? undefined : (ref: any) => { el!.value = props.custom ? ref?.$el?.nextElementSibling : ref?.$el }
+      const elRef = import.meta.server ? undefined : (ref: any) => {
+          throw new Error("STUB");
+      }
 
       function shouldPrefetch (mode: 'visibility' | 'interaction'): boolean {
         if (import.meta.server) { return false }
@@ -414,8 +382,12 @@ export function defineNuxtLink (options: NuxtLinkOptions): NuxtLinkComponent & R
           : isExternal.value ? resolveRouteObject(to.value) : router.resolve(to.value).fullPath
         const normalizedPath = isExternal.value ? new URL(path, window.location.href).href : path
         await Promise.all([
-          nuxtApp.hooks.callHook('link:prefetch', normalizedPath)?.catch(() => {}),
-          !import.meta.dev && !isExternal.value && !hasTarget.value && preloadRouteComponents(to.value as string, router).catch(() => {}),
+          nuxtApp.hooks.callHook('link:prefetch', normalizedPath)?.catch(() => {
+              throw new Error("STUB");
+          }),
+          !import.meta.dev && !isExternal.value && !hasTarget.value && preloadRouteComponents(to.value as string, router).catch(() => {
+              throw new Error("STUB");
+          }),
         ])
       }
 
@@ -426,23 +398,10 @@ export function defineNuxtLink (options: NuxtLinkOptions): NuxtLinkComponent & R
           let idleId: number
           let unobserve: (() => void) | null = null
           onMounted(() => {
-            const observer = useObserver()
-            onNuxtReady(() => {
-              idleId = requestIdleCallback(() => {
-                if (el?.value?.tagName) {
-                  unobserve = observer!.observe(el.value as HTMLElement, async () => {
-                    unobserve?.()
-                    unobserve = null
-                    await prefetch(nuxtApp)
-                  })
-                }
-              })
-            })
+              throw new Error("STUB");
           })
           onBeforeUnmount(() => {
-            if (idleId) { cancelIdleCallback(idleId) }
-            unobserve?.()
-            unobserve = null
+              throw new Error("STUB");
           })
         }
       }
@@ -457,130 +416,7 @@ export function defineNuxtLink (options: NuxtLinkOptions): NuxtLinkComponent & R
       }
 
       return () => {
-        // Resolves `target` value
-        const target = props.target || null
-
-        // Resolves `rel`
-        checkPropConflicts(props, 'noRel', 'rel')
-        const rel = firstNonUndefined<string | null>(
-          // converts `""` to `null` to prevent the attribute from being added as empty (`rel=""`)
-          props.noRel ? '' : props.rel,
-          options.externalRelAttribute,
-          /*
-          * A fallback rel of `noopener noreferrer` is applied for external links or links that open in a new tab.
-          * This solves a reverse tabnapping security flaw in browsers pre-2021 as well as improving privacy.
-          */
-          (isAbsoluteUrl.value || hasTarget.value) ? 'noopener noreferrer' : '',
-        ) || null
-
-        const getCustomSlotProps = (routerLinkSlotProps?: RouterLinkSlotProps): NuxtLinkDefaultSlotProps<true> => ({
-          href: href.value,
-          navigate,
-          get route () {
-            if (!href.value) { return undefined }
-
-            const url = new URL(href.value, import.meta.client ? window.location.href : 'http://localhost')
-            return {
-              path: url.pathname,
-              fullPath: url.pathname,
-              get query () { return parseQuery(url.search) },
-              hash: url.hash,
-              params: {},
-              name: undefined,
-              matched: [],
-              redirectedFrom: undefined,
-              meta: {},
-              href: href.value,
-            } as unknown as RouteLocation & { href: string }
-          },
-          rel,
-          target,
-          isExternal: isExternal.value || hasTarget.value,
-          isActive: false,
-          isExactActive: false,
-          ...routerLinkSlotProps,
-          prefetch,
-          prefetched: prefetched.value,
-          shouldPrefetch,
-        })
-
-        if (!isExternal.value && !hasTarget.value && !isHashLinkWithoutHashMode(to.value)) {
-          const routerLinkProps: RouterLinkProps & VNodeProps & AllowedComponentProps & AnchorHTMLAttributes = {
-            ref: elRef,
-            to: to.value,
-            activeClass: props.activeClass || options.activeClass,
-            exactActiveClass: props.exactActiveClass || options.exactActiveClass,
-            replace: props.replace,
-            ariaCurrentValue: props.ariaCurrentValue,
-            custom: props.custom,
-          }
-
-          // `custom` API cannot support fallthrough attributes as the slot
-          // may render fragment or text root nodes (#14897, #19375)
-          if (!props.custom) {
-            if (import.meta.client) {
-              if (shouldPrefetch('interaction')) {
-                routerLinkProps.onPointerenter = prefetch.bind(null, undefined)
-                routerLinkProps.onFocus = prefetch.bind(null, undefined)
-              }
-              if (prefetched.value) {
-                routerLinkProps.class = props.prefetchedClass || options.prefetchedClass
-              }
-            }
-            routerLinkProps.rel = props.rel || undefined
-          }
-
-          // Internal link
-          return h(
-            resolveComponent('RouterLink'),
-            routerLinkProps,
-            props.custom && slots.default
-              ? { default: (slotProps: RouterLinkSlotProps) => slots.default!(getCustomSlotProps(slotProps)) }
-              : slots.default,
-          )
-        }
-
-        // https://router.vuejs.org/api/interfaces/routerlinkprops#custom-
-        if (props.custom) {
-          if (!slots.default) {
-            return null
-          }
-
-          return slots.default(getCustomSlotProps())
-        }
-
-        return h('a', {
-          ref: el,
-          href: href.value || null, // converts `""` to `null` to prevent the attribute from being added as empty (`href=""`)
-          rel,
-          target,
-          onClick: async (event) => {
-            if (isExternal.value || hasTarget.value) {
-              return
-            }
-
-            event.preventDefault()
-
-            try {
-              const encodedHref = encodeRoutePath(href.value ?? '')
-              return await (props.replace ? router.replace(encodedHref) : router.push(encodedHref))
-            } finally {
-              // Focus the target element for hash links to restore accessibility behavior
-              // that was prevented by event.preventDefault()
-              if (import.meta.client && isHashLinkWithoutHashMode(to.value)) {
-                const rawHash = (to.value as string).slice(1)
-                let hash = rawHash
-                try {
-                  hash = decodeURIComponent(rawHash)
-                } catch {
-                  // ignore errors
-                }
-                const el = document.getElementById(hash)
-                el?.focus()
-              }
-            }
-          },
-        }, slots.default?.())
+          throw new Error("STUB");
       }
     },
   }) as unknown as NuxtLinkComponent & Record<string, any>
@@ -622,21 +458,12 @@ function useObserver (): { observe: ObserveFn } | undefined {
 
   const observe: ObserveFn = (element, callback) => {
     observer ||= new IntersectionObserver((entries) => {
-      for (const entry of entries) {
-        const callback = callbacks.get(entry.target)
-        const isVisible = entry.isIntersecting || entry.intersectionRatio > 0
-        if (isVisible && callback) { callback() }
-      }
+        throw new Error("STUB");
     })
     callbacks.set(element, callback)
     observer.observe(element)
     return () => {
-      callbacks.delete(element)
-      observer?.unobserve(element)
-      if (callbacks.size === 0) {
-        observer?.disconnect()
-        observer = null
-      }
+        throw new Error("STUB");
     }
   }
 

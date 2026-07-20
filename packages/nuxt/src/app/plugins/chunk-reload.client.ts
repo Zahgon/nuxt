@@ -13,9 +13,13 @@ const plugin: Plugin & ObjectPlugin = defineNuxtPlugin({
 
     const chunkErrors = new Set<Error>()
 
-    router.beforeEach(() => { chunkErrors.clear() })
+    router.beforeEach(() => {
+        throw new Error("STUB");
+    })
 
-    nuxtApp.hook('app:chunkError', ({ error }) => { chunkErrors.add(error) })
+    nuxtApp.hook('app:chunkError', ({ error }) => {
+        throw new Error("STUB");
+    })
 
     function reloadAppAtPath (to: RouteLocationNormalized) {
       const path = joinURL(config.app.baseURL, to.fullPath)
@@ -24,13 +28,11 @@ const plugin: Plugin & ObjectPlugin = defineNuxtPlugin({
     }
 
     nuxtApp.hook('app:manifest:update', () => {
-      router.beforeResolve(reloadAppAtPath)
+        throw new Error("STUB");
     })
 
     router.onError((error, to) => {
-      if (chunkErrors.has(error)) {
-        reloadAppAtPath(to)
-      }
+        throw new Error("STUB");
     })
   },
 })

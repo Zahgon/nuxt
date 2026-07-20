@@ -72,20 +72,7 @@ const warnRuntimeUsage = (method: string) => {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const definePageMeta = (meta: PageMeta): void => {
-  if (import.meta.dev) {
-    const component = getCurrentInstance()?.type
-    try {
-      const isRouteComponent = component && useRoute().matched.some(p => Object.values(p.components || {}).includes(component))
-      const isRenderingServerPage = import.meta.server && useNuxtApp().ssrContext?.islandContext
-      if (isRouteComponent || isRenderingServerPage || ((component as any)?.__clientOnlyPage)) {
-        // don't warn if it's being used in a route component (or server page)
-        return
-      }
-    } catch {
-      // ignore any errors with accessing current instance or route
-    }
-    warnRuntimeUsage('definePageMeta')
-  }
+    throw new Error("STUB");
 }
 
 /**
@@ -99,4 +86,6 @@ export const definePageMeta = (meta: PageMeta): void => {
  */
 /* @__NO_SIDE_EFFECTS__ */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const defineRouteRules = (rules: NitroRouteConfig): void => {}
+export const defineRouteRules = (rules: NitroRouteConfig): void => {
+    throw new Error("STUB");
+}

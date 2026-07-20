@@ -64,27 +64,5 @@ export function clearNuxtState (
   keys?: string | string[] | ((key: string) => boolean),
   opts?: ClearNuxtStateOptions,
 ): void {
-  const reset = opts?.reset ?? useStateDefaults.resetOnClear
-
-  const nuxtApp = useNuxtApp()
-  const _allKeys = Object.keys(nuxtApp.payload.state)
-    .filter(key => key.startsWith(useStateKeyPrefix))
-    .map(key => key.substring(useStateKeyPrefix.length))
-
-  const _keys: string[] = !keys
-    ? _allKeys
-    : typeof keys === 'function'
-      ? _allKeys.filter(keys)
-      : toArray(keys)
-
-  for (const _key of _keys) {
-    const key = useStateKeyPrefix + _key
-    if (key in nuxtApp.payload.state) {
-      if (reset && nuxtApp._state[key]) {
-        nuxtApp.payload.state[key] = nuxtApp._state[key]._default()
-      } else {
-        delete nuxtApp.payload.state[key]
-      }
-    }
-  }
+    throw new Error("STUB");
 }

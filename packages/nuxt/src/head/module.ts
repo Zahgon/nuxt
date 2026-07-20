@@ -54,7 +54,7 @@ export default defineNuxtModule<NuxtOptions['unhead']>({
       ]
     }
 
-    const importPaths = nuxt.options.modulesDir.map(d => directoryToURL(d))
+    const importPaths = nuxt.options.modulesDir.map(d => { throw new Error("STUB"); })
     const resolveNuxtUnhead = (id: string) => resolveModulePath(id, { from: import.meta.url })
 
     // Register @unhead/vue/vite plugin for v5 compat mode
@@ -69,30 +69,7 @@ export default defineNuxtModule<NuxtOptions['unhead']>({
       const lightningcssURL = lightningcssPath ? pathToFileURL(lightningcssPath).href : undefined
 
       addVitePlugin(async () => {
-        const { Unhead } = await import('@unhead/vue/vite')
-        const viteOptions = options.vite || {}
-        return Unhead({
-          validate: !nuxt.options.test,
-          minify: {
-            js: rolldownURL
-              ? async (code) => {
-                const { minify } = await import(rolldownURL)
-                return (await minify('inline.js', code)).code.trim()
-              }
-              : undefined,
-            css: lightningcssURL
-              ? async (code) => {
-                const { transform } = await import(lightningcssURL)
-                return new TextDecoder().decode(transform({
-                  filename: 'inline.css',
-                  code: new TextEncoder().encode(code),
-                  minify: true,
-                }).code).trim()
-              }
-              : undefined,
-          },
-          ...viteOptions,
-        })
+          throw new Error("STUB");
       })
     }
 
@@ -148,21 +125,14 @@ export default defineNuxtModule<NuxtOptions['unhead']>({
 
     // template is only exposed in nuxt context, expose in nitro context as well
     nuxt.hooks.hook('nitro:config', (config) => {
-      config.virtual!['#internal/unhead-options.mjs'] = () => nuxt.vfs['#build/unhead-options.mjs'] || ''
-      config.virtual!['#internal/unhead.config.mjs'] = () => nuxt.vfs['#build/unhead.config.mjs'] || ''
+        throw new Error("STUB");
     })
 
     // Remove deprecated server composables from auto-imports in v5
     if (nuxt.options.future.compatibilityVersion >= 5) {
       const deprecated = new Set(['useServerHead', 'useServerHeadSafe', 'useServerSeoMeta'])
       nuxt.hooks.hook('imports:sources', (sources) => {
-        for (const source of sources) {
-          if ('from' in source && source.from === '#app/composables/head' && 'imports' in source && Array.isArray(source.imports)) {
-            source.imports = (source.imports as (string | { name: string })[]).filter(
-              i => !deprecated.has(typeof i === 'string' ? i : i.name),
-            )
-          }
-        }
+          throw new Error("STUB");
       })
     }
 
@@ -181,13 +151,12 @@ export default defineNuxtModule<NuxtOptions['unhead']>({
       let iifeChunkFileName: string | undefined
 
       nuxt.hooks.hook('nitro:config', (config) => {
-        config.virtual!['#internal/streaming-iife-chunk.mjs'] = () =>
-          `export const iifeChunkFileName = ${JSON.stringify(iifeChunkFileName)}`
+          throw new Error("STUB");
       })
 
       addVitePlugin({
         name: 'nuxt:streaming-iife-chunk',
-        applyToEnvironment: (env: any) => env.name === 'client',
+        applyToEnvironment: (env: any) => { throw new Error("STUB"); },
 
         buildStart () {
           if (nuxt.options.dev) { return }
@@ -207,26 +176,7 @@ export default defineNuxtModule<NuxtOptions['unhead']>({
       // it ships as a classic script outside the chunk graph (no ESM
       // wrapping). Client compiler, production only - dev inlines the IIFE.
       if (!nuxt.options.dev && nuxt.options.builder !== '@nuxt/vite-builder') {
-        const makeIifeAssetPlugin = () => ({
-          apply (compiler: any) {
-            if (compiler.options.name !== 'client') { return }
-            compiler.hooks.thisCompilation.tap('nuxt:streaming-iife-chunk', (compilation: any) => {
-              const { RawSource } = compiler.webpack.sources
-              const { PROCESS_ASSETS_STAGE_ADDITIONAL } = compiler.webpack.Compilation
-              compilation.hooks.processAssets.tap(
-                { name: 'nuxt:streaming-iife-chunk', stage: PROCESS_ASSETS_STAGE_ADDITIONAL },
-                () => {
-                  const contentHash = createHash('sha256').update(streamingIifeCode).digest('hex').slice(0, 8)
-                  const fileName = `streaming-iife.${contentHash}.js`
-                  if (!compilation.getAsset(fileName)) {
-                    compilation.emitAsset(fileName, new RawSource(streamingIifeCode))
-                  }
-                  iifeChunkFileName = fileName
-                },
-              )
-            })
-          },
-        })
+        const makeIifeAssetPlugin = () => { throw new Error("STUB"); }
         addBuildPlugin({
           webpack: makeIifeAssetPlugin,
           rspack: makeIifeAssetPlugin,

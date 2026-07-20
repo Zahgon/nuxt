@@ -15,14 +15,7 @@ const routeRulesMatcher = _routeRulesMatcher as (path: string) => NitroRouteRule
 let routes: string[]
 
 const plugin: Plugin & ObjectPlugin = defineNuxtPlugin(async () => {
-  if (!import.meta.server || !import.meta.prerender || hashMode) {
-    return
-  }
-  if (routes && !routes.length) { return }
-
-  routes ||= Array.from(processRoutes(await routerOptions.routes?.(_routes) ?? _routes))
-  const batch = routes.splice(0, 10)
-  prerenderRoutes(batch)
+    throw new Error("STUB");
 })
 
 export default plugin

@@ -43,7 +43,7 @@ const TagPositionProps = {
 
 function normalizeProps<T extends Record<string, any>> (_props: T, key?: string): Partial<T> {
   const props = Object.fromEntries(
-    Object.entries(_props).filter(([_, value]) => value !== undefined),
+    Object.entries(_props).filter(([_, value]) => { throw new Error("STUB"); }),
   ) as Partial<T> & { tagPosition?: UnheadStyle['tagPosition'], tagPriority: UnheadStyle['tagPriority'] }
   if (typeof props.body !== 'undefined') {
     props.tagPosition = props.body ? 'bodyClose' : 'head'
@@ -74,7 +74,7 @@ function createHeadComponentCtx (): HeadComponentCtx {
   }
   const input = reactive({})
   const entry = useHead(input)
-  const ctx: HeadComponentCtx = { input, entry, update: () => entry.patch(input) }
+  const ctx: HeadComponentCtx = { input, entry, update: () => { throw new Error("STUB"); } }
   provide(HeadComponentCtxSymbol, ctx)
   return ctx
 }
@@ -196,27 +196,11 @@ export const NoScript: DefineSetupFnComponent<GlobalProps & TagPositionPropsType
     input.noscript ||= []
     const idx: keyof typeof input.noscript = input.noscript.push({}) - 1
     onUnmounted(() => {
-      input.noscript![idx] = null
-      update()
+        throw new Error("STUB");
     })
     const key = useVNodeStringKey()
     return () => {
-      const noscript = normalizeProps(props, key) as Noscript
-      const slotVnodes = slots.default?.()
-      const textContent: VNodeNormalizedChildren[] = []
-      if (slotVnodes) {
-        for (const vnode of slotVnodes) {
-          if (vnode.children) {
-            textContent.push(vnode.children)
-          }
-        }
-      }
-      if (textContent.length > 0) {
-        noscript.textContent = textContent.join('')
-      }
-      input.noscript![idx] = noscript
-      update()
-      return null
+        throw new Error("STUB");
     }
   },
 }) as unknown as DefineSetupFnComponent<GlobalProps & TagPositionPropsType & { title?: string }, {}, SlotWithDefault>
@@ -282,14 +266,11 @@ export const Link: DefineSetupFnComponent<LinkComponentProps> = defineComponent(
     const key = useVNodeStringKey()
 
     onUnmounted(() => {
-      input.link![idx] = null
-      update()
+        throw new Error("STUB");
     })
 
     return () => {
-      input.link![idx] = normalizeProps(props, key) as UnheadLink
-      update()
-      return null
+        throw new Error("STUB");
     }
   },
 }) as unknown as DefineSetupFnComponent<LinkComponentProps>
@@ -312,13 +293,10 @@ export const Base: DefineSetupFnComponent<BaseComponentProps> = defineComponent(
     const { input, update } = useHeadComponentCtx()
     const key = useVNodeStringKey()
     onUnmounted(() => {
-      input.base = null
-      update()
+        throw new Error("STUB");
     })
     return () => {
-      input.base = normalizeProps(props, key) as UnheadBase
-      update()
-      return null
+        throw new Error("STUB");
     }
   },
 }) as unknown as DefineSetupFnComponent<BaseComponentProps>
@@ -330,19 +308,10 @@ export const Title: DefineSetupFnComponent<{}, {}, SlotWithDefault> = defineComp
   setup (_, { slots }) {
     const { input, update } = useHeadComponentCtx()
     onUnmounted(() => {
-      input.title = null
-      update()
+        throw new Error("STUB");
     })
     return () => {
-      const defaultSlot = slots.default?.()
-      input.title = defaultSlot?.[0]?.children ? String(defaultSlot?.[0]?.children) : undefined
-      if (import.meta.dev) {
-        if (defaultSlot && (defaultSlot.length > 1 || (defaultSlot[0] && typeof defaultSlot[0].children !== 'string'))) {
-          unheadDiagnostics.NUXT_E6002()
-        }
-      }
-      update()
-      return null
+        throw new Error("STUB");
     }
   },
 }) as unknown as DefineSetupFnComponent<{}, {}, SlotWithDefault>
@@ -373,18 +342,10 @@ export const Meta: DefineSetupFnComponent<MetaComponentProps> = defineComponent(
     input.meta ||= []
     const idx: keyof typeof input.meta = input.meta.push(null) - 1
     onUnmounted(() => {
-      input.meta![idx] = null
-      update()
+        throw new Error("STUB");
     })
     return () => {
-      const meta = { 'http-equiv': props.httpEquiv, ...normalizeProps(props, key) } as UnheadMeta
-      // fix casing for http-equiv
-      if ('httpEquiv' in meta) {
-        delete meta.httpEquiv
-      }
-      input.meta![idx] = meta
-      update()
-      return null
+        throw new Error("STUB");
     }
   },
 }) as unknown as DefineSetupFnComponent<MetaComponentProps>
@@ -421,21 +382,10 @@ export const Style: DefineSetupFnComponent<StyleComponentProps, {}, SlotWithDefa
     input.style ||= []
     const idx: keyof typeof input.style = input.style.push({}) - 1
     onUnmounted(() => {
-      input.style![idx] = null
-      update()
+        throw new Error("STUB");
     })
     return () => {
-      const style = normalizeProps(props, key) as UnheadStyle
-      const textContent = slots.default?.()?.[0]?.children
-      if (textContent) {
-        if (import.meta.dev && typeof textContent !== 'string') {
-          unheadDiagnostics.NUXT_E6003()
-        }
-        input.style![idx] = style
-        style.textContent = textContent as string
-      }
-      update()
-      return null
+        throw new Error("STUB");
     }
   },
 }) as unknown as DefineSetupFnComponent<StyleComponentProps, {}, SlotWithDefault>
@@ -445,8 +395,7 @@ export const Head: DefineSetupFnComponent<{}, {}, SlotWithDefault> = defineCompo
   name: 'Head',
   inheritAttrs: false,
   setup: (_props, ctx) => {
-    createHeadComponentCtx()
-    return () => ctx.slots.default?.()
+      throw new Error("STUB");
   },
 }) as unknown as DefineSetupFnComponent<{}, {}, SlotWithDefault>
 
@@ -469,13 +418,10 @@ export const Html: DefineSetupFnComponent<HtmlComponentProps, {}, SlotWithDefaul
   setup (_props, ctx) {
     const { input, update } = useHeadComponentCtx()
     onUnmounted(() => {
-      input.htmlAttrs = null
-      update()
+        throw new Error("STUB");
     })
     return () => {
-      input.htmlAttrs = { ..._props, ...ctx.attrs } as HtmlAttributes
-      update()
-      return ctx.slots.default?.()
+        throw new Error("STUB");
     }
   },
 }) as unknown as DefineSetupFnComponent<HtmlComponentProps, {}, SlotWithDefault>
@@ -488,13 +434,10 @@ export const Body: DefineSetupFnComponent<GlobalProps, {}, SlotWithDefault> = de
   setup (_props, ctx) {
     const { input, update } = useHeadComponentCtx()
     onUnmounted(() => {
-      input.bodyAttrs = null
-      update()
+        throw new Error("STUB");
     })
     return () => {
-      input.bodyAttrs = { ..._props, ...ctx.attrs } as BodyAttributes
-      update()
-      return ctx.slots.default?.()
+        throw new Error("STUB");
     }
   },
 }) as unknown as DefineSetupFnComponent<GlobalProps, {}, SlotWithDefault>

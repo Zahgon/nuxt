@@ -14,185 +14,185 @@ function renderStubMessage (name: string): void {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScript<T extends Record<string | symbol, any>> (input: UseScriptInput, options?: Record<string, unknown>): void {
-  renderStubMessage('useScript')
+    throw new Error("STUB");
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptTriggerElement (...args: unknown[]): void {
-  renderStubMessage('useScriptTriggerElement')
+    throw new Error("STUB");
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptTriggerConsent (...args: unknown[]): void {
-  renderStubMessage('useScriptTriggerConsent')
+    throw new Error("STUB");
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptEventPage (...args: unknown[]): void {
-  renderStubMessage('useScriptEventPage')
+    throw new Error("STUB");
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptGoogleAnalytics (...args: unknown[]): void {
-  renderStubMessage('useScriptGoogleAnalytics')
+    throw new Error("STUB");
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptPlausibleAnalytics (...args: unknown[]): void {
-  renderStubMessage('useScriptPlausibleAnalytics')
+    throw new Error("STUB");
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptCloudflareWebAnalytics (...args: unknown[]): void {
-  renderStubMessage('useScriptCloudflareWebAnalytics')
+    throw new Error("STUB");
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptCrisp (...args: unknown[]): void {
-  renderStubMessage('useScriptCrisp')
+    throw new Error("STUB");
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptFathomAnalytics (...args: unknown[]): void {
-  renderStubMessage('useScriptFathomAnalytics')
+    throw new Error("STUB");
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptMatomoAnalytics (...args: unknown[]): void {
-  renderStubMessage('useScriptMatomoAnalytics')
+    throw new Error("STUB");
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptGoogleTagManager (...args: unknown[]): void {
-  renderStubMessage('useScriptGoogleTagManager')
+    throw new Error("STUB");
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptSegment (...args: unknown[]): void {
-  renderStubMessage('useScriptSegment')
+    throw new Error("STUB");
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptClarity (...args: unknown[]): void {
-  renderStubMessage('useScriptClarity')
+    throw new Error("STUB");
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptMetaPixel (...args: unknown[]): void {
-  renderStubMessage('useScriptMetaPixel')
+    throw new Error("STUB");
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptXPixel (...args: unknown[]): void {
-  renderStubMessage('useScriptXPixel')
+    throw new Error("STUB");
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptIntercom (...args: unknown[]): void {
-  renderStubMessage('useScriptIntercom')
+    throw new Error("STUB");
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptHotjar (...args: unknown[]): void {
-  renderStubMessage('useScriptHotjar')
+    throw new Error("STUB");
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptStripe (...args: unknown[]): void {
-  renderStubMessage('useScriptStripe')
+    throw new Error("STUB");
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptLemonSqueezy (...args: unknown[]): void {
-  renderStubMessage('useScriptLemonSqueezy')
+    throw new Error("STUB");
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptVimeoPlayer (...args: unknown[]): void {
-  renderStubMessage('useScriptVimeoPlayer')
+    throw new Error("STUB");
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptGoogleMaps (...args: unknown[]): void {
-  renderStubMessage('useScriptGoogleMaps')
+    throw new Error("STUB");
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptNpm (...args: unknown[]): void {
-  renderStubMessage('useScriptNpm')
+    throw new Error("STUB");
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptGoogleAdsense (...args: unknown[]): void {
-  renderStubMessage('useScriptGoogleAdsense')
+    throw new Error("STUB");
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptYouTubePlayer (...args: unknown[]): void {
-  renderStubMessage('useScriptYouTubePlayer')
+    throw new Error("STUB");
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptUmamiAnalytics (...args: unknown[]): void {
-  renderStubMessage('useScriptUmamiAnalytics')
+    throw new Error("STUB");
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptSnapchatPixel (...args: unknown[]): void {
-  renderStubMessage('useScriptSnapchatPixel')
+    throw new Error("STUB");
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptRybbitAnalytics (...args: unknown[]): void {
-  renderStubMessage('useScriptRybbitAnalytics')
+    throw new Error("STUB");
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptDatabuddyAnalytics (...args: unknown[]): void {
-  renderStubMessage('useScriptDatabuddyAnalytics')
+    throw new Error("STUB");
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptRedditPixel (...args: unknown[]): void {
-  renderStubMessage('useScriptRedditPixel')
+    throw new Error("STUB");
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptPayPal (...args: unknown[]): void {
-  renderStubMessage('useScriptPayPal')
+    throw new Error("STUB");
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptVercelAnalytics (...args: unknown[]): void {
-  renderStubMessage('useScriptVercelAnalytics')
+    throw new Error("STUB");
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptPostHog (...args: unknown[]): void {
-  renderStubMessage('useScriptPostHog')
+    throw new Error("STUB");
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptMixpanelAnalytics (...args: unknown[]): void {
-  renderStubMessage('useScriptMixpanelAnalytics')
+    throw new Error("STUB");
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptBingUet (...args: unknown[]): void {
-  renderStubMessage('useScriptBingUet')
+    throw new Error("STUB");
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptTikTokPixel (...args: unknown[]): void {
-  renderStubMessage('useScriptTikTokPixel')
+    throw new Error("STUB");
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptGoogleRecaptcha (...args: unknown[]): void {
-  renderStubMessage('useScriptGoogleRecaptcha')
+    throw new Error("STUB");
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptGoogleSignIn (...args: unknown[]): void {
-  renderStubMessage('useScriptGoogleSignIn')
+    throw new Error("STUB");
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptGravatar (...args: unknown[]): void {
-  renderStubMessage('useScriptGravatar')
+    throw new Error("STUB");
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptAhrefsAnalytics (...args: unknown[]): void {
-  renderStubMessage('useScriptAhrefsAnalytics')
+    throw new Error("STUB");
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptLinkedInInsight (...args: unknown[]): void {
-  renderStubMessage('useScriptLinkedInInsight')
+    throw new Error("STUB");
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptCalendly (...args: unknown[]): void {
-  renderStubMessage('useScriptCalendly')
+    throw new Error("STUB");
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptUsercentrics (...args: unknown[]): void {
-  renderStubMessage('useScriptUsercentrics')
+    throw new Error("STUB");
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useScriptSpeedCurve (...args: unknown[]): void {
-  renderStubMessage('useScriptSpeedCurve')
+    throw new Error("STUB");
 }

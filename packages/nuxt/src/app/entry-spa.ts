@@ -1,1 +1,3 @@
-export default (): void => {}
+export default (): void => {
+    throw new Error("STUB");
+}

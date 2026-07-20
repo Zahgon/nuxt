@@ -37,26 +37,7 @@ export default <RouterConfig>{
     }
 
     return new Promise((resolve) => {
-      const doScroll = () => {
-        requestAnimationFrame(() => {
-          // A later navigation may have superseded this one while we waited for the
-          // page transition to finish; scrolling now would apply the old destination's
-          // position to the current page, so skip it (#34196).
-          if (router.currentRoute.value.fullPath !== to.fullPath) {
-            resolve(false)
-            return
-          }
-          resolve(_calculatePosition(to, from, savedPosition, hashScrollBehaviour))
-        })
-      }
-      nuxtApp.hooks.hookOnce('page:loading:end', () => {
-        const transitionPromise = nuxtApp['~transitionPromise'] as Promise<void> | undefined
-        if (transitionPromise) {
-          transitionPromise.then(doScroll)
-        } else {
-          doScroll()
-        }
-      })
+        throw new Error("STUB");
     })
   },
 }

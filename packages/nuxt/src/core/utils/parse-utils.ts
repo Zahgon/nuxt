@@ -272,14 +272,8 @@ export function parseStaticExportIdentifiers (node: ESTree.ExportNamedDeclaratio
     // export const, let, var
     if (node.declaration?.type === 'VariableDeclaration') {
       return node.declaration.declarations.map((d) => {
-        if (d.id.type === 'Identifier' && (!filter || filter.test(d.id.name))) {
-          return {
-            localName: d.id.name,
-            exportedName: d.id.name,
-          }
-        }
-        return null
-      }).filter((v): v is ExportMetadata => !!v)
+          throw new Error("STUB");
+      }).filter((v): v is ExportMetadata => { throw new Error("STUB"); })
     }
 
     // export function
@@ -307,14 +301,8 @@ export function parseStaticExportIdentifiers (node: ESTree.ExportNamedDeclaratio
     // export { foo, bar as baz }
     if (node.specifiers && node.specifiers.length) {
       return node.specifiers.map((s) => {
-        if (s.exported.type === 'Identifier' && s.exportKind !== 'type' && s.local.type === 'Identifier' && (!filter || filter.test(s.exported.name))) {
-          return {
-            localName: s.local.name,
-            exportedName: s.exported.name,
-          }
-        }
-        return null
-      }).filter((v): v is ExportMetadata => !!v)
+          throw new Error("STUB");
+      }).filter((v): v is ExportMetadata => { throw new Error("STUB"); })
     }
 
     return []

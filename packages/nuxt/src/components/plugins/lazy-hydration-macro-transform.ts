@@ -28,80 +28,7 @@ const HYDRATION_TO_FACTORY = new Map<string, string>([
 ])
 
 export const LazyHydrationMacroTransformPlugin = (options: LoaderOptions) => createUnplugin(() => {
-  const exclude = options.transform?.exclude || []
-  const include = options.transform?.include || []
-
-  return {
-    name: 'nuxt:lazy-hydration-macro',
-    enforce: 'post',
-    transformInclude (id) {
-      if (exclude.some(pattern => pattern.test(id))) {
-        return false
-      }
-      if (include.some(pattern => pattern.test(id))) {
-        return true
-      }
-      return isVue(id, { type: ['template', 'script'] }) || isJS(id)
-    },
-
-    transform: {
-      filter: {
-        code: {
-          include: LAZY_HYDRATION_MACRO_RE,
-        },
-      },
-      handler (code, id, meta?: unknown) {
-        const s = rolldownString(code, id, meta)
-        const names = new Set<string>()
-        type Edit = { start: number, end: number, replacement: string }
-        const edits: Edit[] = []
-
-        parseAndWalk(code, id, (node, parent) => {
-          if (node.type !== 'CallExpression') { return }
-          if (node.callee?.type !== 'Identifier') { return }
-          if (node.callee.name !== 'defineLazyHydrationComponent') { return }
-
-          if (parent?.type !== 'VariableDeclarator') { return }
-          if (parent.id.type !== 'Identifier') { return }
-
-          if (node.arguments.length < 2) { return }
-          const [strategyArgument, loaderArgument] = node.arguments
-
-          if (!isStringLiteral(strategyArgument)) { return }
-          const strategy: string = strategyArgument.value
-
-          const functionName = HYDRATION_TO_FACTORY.get(strategy)
-          if (!functionName) { return }
-
-          if (loaderArgument?.type !== 'ArrowFunctionExpression') { return }
-
-          const { importExpression, importLiteral } = findImportExpression(loaderArgument.body)
-          if (!importExpression || !isStringLiteral(importLiteral)) { return }
-
-          const rawPath = importLiteral.value
-          const filePath = resolveAlias(rawPath, options.alias || {})
-          const relativePath = relative(options.srcDir, filePath)
-
-          const originalLoader = code.slice(loaderArgument.start, loaderArgument.end)
-          const replacement = `__${functionName}(${JSON.stringify(relativePath)}, ${originalLoader})`
-
-          edits.push({ start: node.start, end: node.end, replacement })
-          names.add(functionName)
-        })
-
-        for (const edit of edits) {
-          s.overwrite(edit.start, edit.end, edit.replacement)
-        }
-
-        if (names.size) {
-          const imports = genImport(options.clientDelayedComponentRuntime, [...names].map(name => ({ name, as: `__${name}` })))
-          s.prepend(imports)
-        }
-
-        return generateTransform(s, id)
-      },
-    },
-  }
+    throw new Error("STUB");
 })
 
 function isStringLiteral (node: ESTree.Argument | undefined): node is ESTree.StringLiteral {
@@ -113,7 +40,7 @@ function findImportExpression (node: ESTree.Expression | ESTree.FunctionBody): {
     return { importExpression: node, importLiteral: node.source }
   }
   if (node.type === 'BlockStatement') {
-    const returnStmt = node.body.find(stmt => stmt.type === 'ReturnStatement')
+    const returnStmt = node.body.find(stmt => { throw new Error("STUB"); })
     if (returnStmt && returnStmt.argument) {
       return findImportExpression(returnStmt.argument)
     }

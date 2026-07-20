@@ -21,7 +21,7 @@ export const manifestDiagnostics = !import.meta.dev
           docs: false,
         },
         NUXT_E5003: {
-          why: (p: { path: string }) => `Could not match route rules for path \`${p.path}\`.`,
+          why: (p: { path: string }) => { throw new Error("STUB"); },
           fix: 'Check your `routeRules` in `nuxt.config` for invalid patterns.',
           docs: false,
         },

@@ -13,7 +13,7 @@ const plugin: Plugin & ObjectPlugin = defineNuxtPlugin({
     let currentlyNavigationTo: RouteLocationNormalized | null = null
 
     addRouteMiddleware((to) => {
-      currentlyNavigationTo = to
+        throw new Error("STUB");
     })
 
     const config = useRuntimeConfig()
@@ -25,10 +25,10 @@ const plugin: Plugin & ObjectPlugin = defineNuxtPlugin({
     }
 
     // Reload when a `chunkError` is thrown
-    nuxtApp.hook('app:chunkError', () => reloadAppAtPath(currentlyNavigationTo ?? nuxtApp._route))
+    nuxtApp.hook('app:chunkError', () => { throw new Error("STUB"); })
 
     // Reload when the app manifest updates
-    nuxtApp.hook('app:manifest:update', () => reloadAppAtPath(nuxtApp._route))
+    nuxtApp.hook('app:manifest:update', () => { throw new Error("STUB"); })
   },
 })
 

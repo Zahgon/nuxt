@@ -44,12 +44,12 @@ export function createPagesContext (options: PagesContextOptions = {}): PagesCon
   const treeOptions: BuildTreeOptions = {
     roots: options.roots,
     modes,
-    warn: message => pageDiagnostics.NUXT_B4011({ message }),
+    warn: message => { throw new Error("STUB"); },
   }
   const emitOptions: VueRouterEmitOptions = {
     onDuplicateRouteName: (_name, file, existingFile) => {
-      pageDiagnostics.NUXT_B4004({ file, existingFile })
-    },
+          throw new Error("STUB");
+      },
     attrs: { mode: modes },
   }
 
@@ -89,7 +89,7 @@ export function createPagesContext (options: PagesContextOptions = {}): PagesCon
 // ---------------------------------------------------------------------------
 
 export async function resolvePagesRoutes (pattern: string | string[], nuxt = useNuxt(), ctx?: PagesContext): Promise<NuxtPage[]> {
-  const pagesDirs = getLayerDirectories(nuxt).map(d => d.appPages)
+  const pagesDirs = getLayerDirectories(nuxt).map(d => { throw new Error("STUB"); })
 
   const inputFiles: InputFile[] = []
   for (let priority = 0; priority < pagesDirs.length; priority++) {
@@ -111,7 +111,7 @@ export async function resolvePagesRoutes (pattern: string | string[], nuxt = use
     pages = oneShot.emit()
   }
 
-  return augmentAndResolve(pages, ctx?.trackedFiles ?? new Set(inputFiles.map(f => f.path)), nuxt)
+  return augmentAndResolve(pages, ctx?.trackedFiles ?? new Set(inputFiles.map(f => { throw new Error("STUB"); })), nuxt)
 }
 
 // ---------------------------------------------------------------------------
@@ -266,72 +266,7 @@ export function getRouteMeta (contents: string, absolutePath: string, extraExtra
     const dynamicProperties = new Set<keyof NuxtPage>()
 
     parseAndWalk(script.code, absolutePath.replace(/\.\w+$/, '.' + script.loader), (node) => {
-      if (node.type !== 'ExpressionStatement' || node.expression.type !== 'CallExpression' || node.expression.callee.type !== 'Identifier') { return }
-
-      // function name is one of the extracted macro functions and not yet found
-      const fnName = node.expression.callee.name
-      if (fnName in found === false || found[fnName] !== false) { return }
-      found[fnName] = true
-
-      const code = script.code
-      const pageExtractArgument = unwrapStaticExpression(node.expression.arguments[0])
-
-      if (pageExtractArgument?.type !== 'ObjectExpression') {
-        pageDiagnostics.NUXT_B4005({ fnName, file: absolutePath, receivedType: String(pageExtractArgument?.type) })
-        return
-      }
-
-      if (fnName === 'defineRouteRules') {
-        const { value, serializable } = isSerializable(code, pageExtractArgument)
-        if (!serializable) {
-          pageDiagnostics.NUXT_B4006({ fnName, file: absolutePath })
-          return
-        }
-
-        extractedData.rules = value
-        return
-      }
-
-      if (fnName === 'definePageMeta') {
-        for (const key of extractionKeys) {
-          const property = pageExtractArgument.properties.find((property): property is ESTree.ObjectProperty => property.type === 'Property' && property.key.type === 'Identifier' && property.key.name === key)
-          if (!property) { continue }
-
-          const { value, serializable } = isSerializable(code, property.value)
-          if (!serializable) {
-            logger.debug(`Skipping extraction of \`${key}\` metadata as it is not JSON-serializable (reading \`${absolutePath}\`).`)
-            dynamicProperties.add(extraExtractionKeys.has(key) ? 'meta' : key)
-            continue
-          }
-
-          if (extraExtractionKeys.has(key)) {
-            extractedData.meta ??= {}
-            extractedData.meta[key] = value
-          } else {
-            extractedData[key] = value
-          }
-        }
-
-        for (const property of pageExtractArgument.properties) {
-          if (property.type !== 'Property') {
-            continue
-          }
-          const isIdentifierOrLiteral = property.key.type === 'Literal' || property.key.type === 'Identifier'
-          if (!isIdentifierOrLiteral) {
-            continue
-          }
-          const name = property.key.type === 'Identifier' ? property.key.name : String(property.value)
-          if (!extractionKeys.has(name as keyof NuxtPage)) {
-            dynamicProperties.add('meta')
-            break
-          }
-        }
-
-        if (dynamicProperties.size) {
-          extractedData.meta ??= {}
-          extractedData.meta[DYNAMIC_META_KEY] = dynamicProperties
-        }
-      }
+        throw new Error("STUB");
     })
   }
 
@@ -382,147 +317,7 @@ export function normalizeRoutes (routes: NuxtPage[], metaImports: Set<string> = 
   return {
     imports: metaImports,
     routes: genArrayFromRaw(routes.map((page) => {
-      const markedDynamic = page.meta?.[DYNAMIC_META_KEY] as Set<string> | undefined ?? new Set<string>()
-      const metaFiltered: Record<string, any> = {}
-      let skipMeta = true
-      for (const key in page.meta || {}) {
-        if (key !== DYNAMIC_META_KEY && page.meta![key] !== undefined) {
-          skipMeta = false
-          metaFiltered[key] = page.meta![key]
-        }
-      }
-
-      const skipAlias = toArray(page.alias).every(val => !val)
-
-      const route: NormalizedRoute = {
-        path: serializeRouteValue(page.path),
-        props: serializeRouteValue(page.props),
-        name: serializeRouteValue(page.name),
-        meta: serializeRouteValue(metaFiltered, skipMeta),
-        alias: serializeRouteValue(toArray(page.alias), skipAlias),
-        redirect: serializeRouteValue(page.redirect),
-      }
-
-      for (const key of [...defaultExtractionKeys, 'meta'] satisfies NormalizedRouteKeys) {
-        if (route[key] === undefined) {
-          delete route[key]
-        }
-      }
-
-      if (page.children?.length) {
-        route.children = normalizeRoutes(page.children, metaImports, options).routes
-      }
-
-      // Without a file, we can't use `definePageMeta` to extract route-level meta from the file
-      if (!page.file) {
-        return route
-      }
-
-      const file = normalize(page.file)
-      const pageImportName = genSafeVariableName(filename(file) + hash(file).replace(/-/g, '_'))
-      const metaImportName = pageImportName + 'Meta'
-      metaImports.add(genImport(`${file}?macro=true`, [{ name: 'default', as: metaImportName }]))
-
-      if (page._sync) {
-        metaImports.add(genImport(file, [{ name: 'default', as: pageImportName }]))
-      }
-
-      const isSyncImport = page._sync && page.mode !== 'client'
-      const pageImport = isSyncImport ? pageImportName : genDynamicImport(file)
-      const metaRouteName = `${metaImportName}?.name ?? ${route.name}`
-
-      // we use this to validate that a server page is rendering the correct url
-      const islandKey = page.mode === 'server' && page.file
-        ? JSON.stringify(hash(relative(nuxt.options.rootDir, page.file)))
-        : undefined
-
-      const component = nuxt.options.experimental.normalizePageNames
-        ? normalizeComponentWithName(page, isSyncImport, pageImportName, pageImport, route.name, metaRouteName, islandKey)
-        : normalizeComponent(page, pageImport, route.name, islandKey)
-
-      // Named views from the `name@view.vue` filename convention. The scanner
-      // emits `components: { default: <file>, <view>: <file> }`.
-      // https://router.vuejs.org/guide/essentials/named-views.html
-      let componentsObject: string | undefined
-      if (page.components) {
-        const viewEntries: string[] = []
-        for (const viewName in page.components) {
-          if (viewName === 'default') { continue }
-          const viewFile = normalize(page.components[viewName]!)
-          viewEntries.push(`${JSON.stringify(viewName)}: ${genDynamicImport(viewFile)}`)
-        }
-        if (viewEntries.length > 0) {
-          componentsObject = `{ default: ${component}, ${viewEntries.join(', ')} }`
-        }
-      }
-
-      const metaRoute: NormalizedRoute = {
-        name: metaRouteName,
-        path: `${metaImportName}?.path ?? ${route.path}`,
-        props: `${metaImportName}?.props ?? ${route.props ?? false}`,
-        meta: `${metaImportName} || {}`,
-        alias: `${metaImportName}?.alias || []`,
-        redirect: `${metaImportName}?.redirect`,
-        component,
-      }
-      if (componentsObject) {
-        metaRoute.components = componentsObject
-      }
-
-      if (page.mode === 'server') {
-        metaImports.add(`
-let _createIslandPage
-async function createIslandPage (name, islandKey) {
-  _createIslandPage ||= await import(${JSON.stringify(options?.serverComponentRuntime)}).then(r => r.createIslandPage)
-  return _createIslandPage(name, islandKey)
-};`)
-      } else if (page.mode === 'client') {
-        metaImports.add(`
-let _createClientPage
-async function createClientPage(loader) {
-  _createClientPage ||= await import(${JSON.stringify(options?.clientComponentRuntime)}).then(r => r.createClientPage)
-  return _createClientPage(loader);
-}`)
-      }
-
-      if (route.children) {
-        metaRoute.children = route.children
-      }
-
-      if (route.meta) {
-        metaRoute.meta = `{ ...(${metaImportName} || {}), ...${route.meta} }`
-      }
-
-      if (options?.overrideMeta) {
-        // skip and retain fallback if marked dynamic
-        // set to extracted value or fallback if none extracted
-        for (const key of ['name', 'path'] satisfies NormalizedRouteKeys) {
-          if (markedDynamic.has(key)) { continue }
-          metaRoute[key] = route[key] ?? `${metaImportName}?.${key}`
-        }
-
-        // set to extracted value or delete if none extracted
-        for (const key of ['meta', 'alias', 'redirect', 'props'] satisfies NormalizedRouteKeys) {
-          if (markedDynamic.has(key)) { continue }
-
-          if (route[key] == null) {
-            delete metaRoute[key]
-            continue
-          }
-
-          metaRoute[key] = route[key]
-        }
-      } else {
-        if (route.alias != null) {
-          metaRoute.alias = `${route.alias}.concat(${metaImportName}?.alias || [])`
-        }
-
-        if (route.redirect != null) {
-          metaRoute.redirect = route.redirect
-        }
-      }
-
-      return metaRoute
+        throw new Error("STUB");
     })),
   }
 }
@@ -543,7 +338,7 @@ export function pathToNitroGlob (path: string) {
 export function resolveRoutePaths (page: NuxtPage, parent = '/'): string[] {
   return [
     joinURL(parent, page.path),
-    ...page.children?.flatMap(child => resolveRoutePaths(child, joinURL(parent, page.path))) || [],
+    ...page.children?.flatMap(child => { throw new Error("STUB"); }) || [],
   ]
 }
 
@@ -615,9 +410,9 @@ export function toRou3Patterns (pages: NuxtPage[], prefix = '/'): string[] {
       // remove all regex patterns
       .replace(/\([^)]*\)/g, '')
       // catchalls: `:name([^/]*)*` or `:catchall(.*)*`
-      .replace(/:(\w+)\*.*/g, (_, name) => `**:${name}`)
+      .replace(/:(\w+)\*.*/g, (_, name) => { throw new Error("STUB"); })
       // dynamic paths, including custom patterns, e.g. :id([^/]*)*/suffix
-      .replace(/:([^/*]*)/g, (_, name) => `:${name.replace(/\W/g, (r: string) => r === '?' ? '' : '_')}`)
+      .replace(/:([^/*]*)/g, (_, name) => { throw new Error("STUB"); })
 
     routes.push(joinURL(prefix, path))
 

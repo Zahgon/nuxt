@@ -31,48 +31,11 @@ export async function loadPayload (url: string, opts: LoadPayloadOptions = {}): 
 }
 let linkRelType: 'preload' | 'prefetch' | undefined
 function detectLinkRelType (): 'preload' | 'prefetch' {
-  if (import.meta.server) { return 'preload' }
-  if (linkRelType) { return linkRelType }
-  const relList = document.createElement('link').relList
-  linkRelType = relList && relList.supports && relList.supports('prefetch') ? 'prefetch' : 'preload'
-  return linkRelType
+    throw new Error("STUB");
 }
 /** @since 3.0.0 */
 export function preloadPayload (url: string, opts: LoadPayloadOptions = {}): Promise<void> {
-  const nuxtApp = useNuxtApp()
-  const promise = shouldLoadPayload(url).then(async (shouldPreload) => {
-    if (!shouldPreload) {
-      return
-    }
-    const payloadURL = await _getPayloadURL(url, opts)
-    const rel = detectLinkRelType()
-    const link = defineLink({ rel, as: 'fetch', crossorigin: 'anonymous', href: payloadURL })
-
-    if (import.meta.server) {
-      nuxtApp.runWithContext(() => useHead({ link: [link] }))
-    } else {
-      const linkEl = document.createElement('link')
-      linkEl.rel = rel
-      linkEl.setAttribute('as', 'fetch')
-      linkEl.crossOrigin = 'anonymous'
-      linkEl.href = payloadURL
-      document.head.appendChild(linkEl)
-      return new Promise<void>((resolve, reject) => {
-        const cleanup = () => {
-          linkEl.removeEventListener('load', onLoad)
-          linkEl.removeEventListener('error', onError)
-        }
-        const onLoad = () => { cleanup(); resolve() }
-        const onError = () => { cleanup(); reject() }
-        linkEl.addEventListener('load', onLoad)
-        linkEl.addEventListener('error', onError)
-      })
-    }
-  })
-  if (import.meta.server) {
-    onServerPrefetch(() => promise)
-  }
-  return promise
+    throw new Error("STUB");
 }
 
 // --- Internal ---
@@ -167,36 +130,7 @@ let payloadCache: NuxtPayload | null = null
 
 /** @since 3.4.0 */
 export async function getNuxtClientPayload (): Promise<NuxtPayload | Partial<NuxtPayload> | null> {
-  if (import.meta.server) {
-    return null
-  }
-  if (payloadCache) {
-    return payloadCache
-  }
-
-  const el = multiApp ? document.querySelector(`[data-nuxt-data="${appId}"]`) as HTMLElement : document.getElementById('__NUXT_DATA__')
-  if (!el) {
-    return {} as Partial<NuxtPayload>
-  }
-
-  const inlineData = await parsePayload(el.textContent || '')
-
-  // `prerenderedAt` is only set for build-time prerendered HTML - without it, the page
-  // was rendered at runtime (`isr`/`swr`/`cache`) and the external payload must match
-  // the HTML we were just served, so revalidate instead of trusting the browser cache
-  const externalData = el.dataset.src ? await _importPayload(el.dataset.src, inlineData.prerenderedAt ? 'force-cache' : 'no-cache') : undefined
-
-  payloadCache = {
-    ...inlineData,
-    ...externalData,
-    ...(multiApp ? window.__NUXT__?.[appId] : window.__NUXT__),
-  }
-
-  if (payloadCache!.config?.public) {
-    payloadCache!.config.public = reactive(payloadCache!.config.public)
-  }
-
-  return payloadCache
+    throw new Error("STUB");
 }
 
 export async function parsePayload (payload: string): Promise<any> {

@@ -21,20 +21,7 @@ let entry: Entry
 
 if (import.meta.server) {
   entry = async function createNuxtAppServer (ssrContext: CreateOptions['ssrContext']) {
-    const vueApp = createApp(RootComponent)
-
-    const nuxt = createNuxtApp({ vueApp, ssrContext })
-
-    try {
-      await applyPlugins(nuxt, plugins)
-      await nuxt.hooks.callHook('app:created', vueApp)
-    } catch (error) {
-      await nuxt.hooks.callHook('app:error', error)
-      nuxt.payload.error ||= createError(error as any)
-    }
-    if (ssrContext?.['~renderResponse']) { throw new Error('skipping render') }
-
-    return vueApp
+      throw new Error("STUB");
   }
 }
 
@@ -49,60 +36,12 @@ if (import.meta.client) {
   let vueAppPromise: Promise<App<Element>>
 
   entry = async function initApp () {
-    if (vueAppPromise) { return vueAppPromise }
-
-    const isSSR = Boolean(
-      (multiApp ? window.__NUXT__?.[appId] : window.__NUXT__)?.serverRendered ??
-      (multiApp ? document.querySelector(`[data-nuxt-data="${appId}"]`) as HTMLElement : document.getElementById('__NUXT_DATA__'))?.dataset.ssr === 'true',
-    )
-    const vueApp = isSSR ? createSSRApp(RootComponent) : createApp(RootComponent)
-
-    const nuxt = createNuxtApp({ vueApp })
-
-    async function handleVueError (error: any) {
-      await nuxt.callHook('app:error', error)
-      nuxt.payload.error ||= createError(error as any)
-    }
-    // marker so nuxt-root.vue can skip re-invoking the default handler from
-    // its onErrorCaptured (which already calls `app:error` via showError)
-    ;(handleVueError as any).__nuxt_default = true
-
-    vueApp.config.errorHandler = handleVueError
-    // If the errorHandler is not overridden by the user, we unset it after the app is hydrated
-    nuxt.hook('app:suspense:resolve', () => {
-      if (vueApp.config.errorHandler === handleVueError) { vueApp.config.errorHandler = undefined }
-    })
-
-    if (spaLoadingTemplateOutside && !isSSR && appSpaLoaderAttrs.id) {
-      // Remove spa loader if present
-      nuxt.hook('app:suspense:resolve', () => {
-        document.getElementById(appSpaLoaderAttrs.id)?.remove()
-      })
-    }
-
-    try {
-      await applyPlugins(nuxt, plugins)
-    } catch (err) {
-      handleVueError(err)
-    }
-
-    try {
-      await nuxt.hooks.callHook('app:created', vueApp)
-      await nuxt.hooks.callHook('app:beforeMount', vueApp)
-      vueApp.mount(vueAppRootContainer)
-      await nuxt.hooks.callHook('app:mounted', vueApp)
-      await nextTick()
-    } catch (err) {
-      handleVueError(err)
-    }
-
-    return vueApp
+      throw new Error("STUB");
   }
 
   vueAppPromise = entry().catch((error: unknown) => {
-    appDiagnostics.NUXT_E1009({ cause: error })
-    throw error
+      throw new Error("STUB");
   })
 }
 
-export default (ssrContext => entry(ssrContext)) as Entry
+export default (ssrContext => { throw new Error("STUB"); }) as Entry

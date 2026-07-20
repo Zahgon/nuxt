@@ -10,4 +10,6 @@ export function defineLazyHydrationComponent<T extends Component = { new (): Com
 export function defineLazyHydrationComponent<T extends Component = { new (): ComponentPublicInstance }> (strategy: 'time', source: AsyncComponentLoader<T>): LazyHydrationComponent<T, { hydrateAfter: number | true }>
 export function defineLazyHydrationComponent<T extends Component = { new (): ComponentPublicInstance }> (strategy: 'never', source: AsyncComponentLoader<T>): LazyHydrationComponent<T, { hydrateNever?: true }>
 
-export function defineLazyHydrationComponent (_strategy: string, _source: AsyncComponentLoader<any>): any {}
+export function defineLazyHydrationComponent (_strategy: string, _source: AsyncComponentLoader<any>): any {
+    throw new Error("STUB");
+}

@@ -14,7 +14,7 @@ export async function installNuxtModule (name: string, options?: { rootDir?: str
   const searchPaths = options?.searchPaths || nuxt.options.modulesDir
 
   for (const parent of searchPaths) {
-    if (await resolvePackageJSON(name, { parent }).catch(() => null)) {
+    if (await resolvePackageJSON(name, { parent }).catch(() => { throw new Error("STUB"); })) {
       return true
     }
   }

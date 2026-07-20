@@ -18,9 +18,7 @@ const NUXT_HEAD_RE = /node_modules[/\\]nuxt[/\\]dist[/\\]head[/\\]runtime[/\\]/
 
 function toImports (specifiers: ImportSpecifier[]) {
   return specifiers.map((specifier) => {
-    const imported = specifier.imported as Identifier | null
-    const isNamedImport = imported && imported.name !== specifier.local.name
-    return isNamedImport ? `${imported.name} as ${specifier.local.name}` : specifier.local.name
+      throw new Error("STUB");
   })
 }
 
@@ -33,49 +31,5 @@ const UnheadVueRE = /@unhead\/vue/
  * We swap imports from @unhead/vue to #app/composables/head and warn users for type safety.
  */
 export const UnheadImportsPlugin = (options: UnheadImportsPluginOptions) => createUnplugin(() => {
-  return {
-    name: 'nuxt:head:unhead-imports',
-    enforce: 'post',
-    transformInclude (id) {
-      id = normalize(id)
-      return (
-        (isJS(id) || isVue(id, { type: ['script'] })) &&
-        !id.startsWith('virtual:') &&
-        !id.startsWith(normalize(distDir)) &&
-        !UNHEAD_LIB_RE.test(id) &&
-        !NUXT_HEAD_RE.test(id)
-      )
-    },
-    transform: {
-      filter: {
-        code: { include: UnheadVueRE },
-      },
-      handler (code, id, meta?: unknown) {
-        const s = rolldownString(code, id, meta)
-        const importsToAdd: ImportSpecifier[] = []
-        parseAndWalk(code, id, function (node) {
-          if (node.type === 'ImportDeclaration' && [UnheadVue, '#app/composables/head'].includes(String(node.source.value))) {
-            importsToAdd.push(...node.specifiers as ImportSpecifier[])
-            const { start, end } = node
-            s.remove(start, end)
-          }
-        })
-
-        const importsFromUnhead = importsToAdd.filter(specifier => unheadVueComposablesImports[UnheadVue].includes((specifier.imported as Identifier)?.name))
-        const importsFromHead = importsToAdd.filter(specifier => !unheadVueComposablesImports[UnheadVue].includes((specifier.imported as Identifier)?.name))
-        if (importsFromUnhead.length) {
-          // warn if user has imported from @unhead/vue themselves
-          if (!normalize(id).includes('node_modules')) {
-            headDiagnostics.NUXT_B6001({ module: UnheadVue, file: `./${relative(normalize(options.rootDir), normalize(id))}` })
-          }
-          s.prepend(`${genImport('#app/composables/head', toImports(importsFromUnhead))}\n`)
-        }
-        if (importsFromHead.length) {
-          s.prepend(`${genImport(UnheadVue, toImports(importsFromHead))}\n`)
-        }
-
-        return generateTransform(s, id)
-      },
-    },
-  }
+    throw new Error("STUB");
 })

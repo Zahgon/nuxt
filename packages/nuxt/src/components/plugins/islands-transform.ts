@@ -37,121 +37,13 @@ function wrapWithVForDiv (code: string, vfor: string): string {
 }
 
 export const IslandsTransformPlugin = (options: ServerOnlyComponentTransformPluginOptions) => createUnplugin((_options, meta) => {
-  const isVite = meta.framework === 'vite'
-  return {
-    name: 'nuxt:server-only-component-transform',
-    enforce: 'pre',
-    transformInclude (id) {
-      if (!isVue(id)) { return false }
-      if (isVite && options.selectiveClient === 'deep') { return true }
-      const { pathname } = parseModuleId(normalize(id))
-      return isIslandFile(pathname, options)
-    },
-    transform: {
-      filter: {
-        code: {
-          include: [HAS_SLOT_OR_CLIENT_RE],
-        },
-      },
-      async handler (code, id, transformMeta?: unknown) {
-        const template = code.match(TEMPLATE_RE)
-        if (!template) { return }
-        const startingIndex = template.index || 0
-        const s = rolldownString(code, id, transformMeta)
-
-        const { pathname } = parseModuleId(normalize(id))
-        const isIsland = isIslandFile(pathname, options)
-
-        if (!SCRIPT_RE.test(code)) {
-          s.prepend('<script setup>' + IMPORT_CODE + '</script>')
-        } else {
-          for (const match of code.matchAll(SCRIPT_RE_GLOBAL)) {
-            s.appendRight(match.index + match[0].length, IMPORT_CODE)
-          }
-        }
-
-        let hasNuxtClient = false
-
-        const ast = parse(template[0])
-        await walk(ast, (node) => {
-          if (node.type !== ELEMENT_NODE) {
-            return
-          }
-          if (node.name === 'slot') {
-            if (!isIsland) { return }
-            const { attributes, children, loc } = node
-
-            const slotName = attributes.name ?? 'default'
-
-            if (attributes.name) { delete attributes.name }
-            if (attributes['v-bind']) {
-              attributes._bind = extractAttributes(attributes, ['v-bind'])['v-bind']!
-            }
-            const teleportAttributes = extractAttributes(attributes, ['v-if', 'v-else-if', 'v-else'])
-            const bindings = getPropsToString(attributes)
-            // add the wrapper
-            s.appendLeft(startingIndex + loc[0].start, `<NuxtTeleportSsrSlot${attributeToString(teleportAttributes)} name="${slotName}" :props="${bindings}">`)
-
-            if (children.length) {
-              // pass slot fallback to NuxtTeleportSsrSlot fallback
-              const attrString = attributeToString(attributes)
-              const slice = code.slice(startingIndex + loc[0].end, startingIndex + loc[1].start).replaceAll(KEY_RE, '')
-              s.overwrite(startingIndex + loc[0].start, startingIndex + loc[1].end, `<slot${attrString.replaceAll(EXTRACTED_ATTRS_RE, '')}/><template #fallback>${attributes['v-for'] ? wrapWithVForDiv(slice, attributes['v-for']) : slice}</template>`)
-            } else {
-              s.overwrite(startingIndex + loc[0].start, startingIndex + loc[0].end, code.slice(startingIndex + loc[0].start, startingIndex + loc[0].end).replaceAll(EXTRACTED_ATTRS_RE, ''))
-            }
-
-            s.appendRight(startingIndex + loc[1].end, '</NuxtTeleportSsrSlot>')
-            return
-          }
-
-          if (node.name === 'NuxtTeleportIslandComponent') {
-            return
-          }
-
-          if (!('nuxt-client' in node.attributes) && !(':nuxt-client' in node.attributes)) {
-            return
-          }
-
-          hasNuxtClient = true
-
-          if (!isVite || !options.selectiveClient) {
-            return
-          }
-
-          const { loc, attributes } = node
-          const attributeValue = attributes[':nuxt-client'] || attributes['nuxt-client'] || 'true'
-          const wrapperAttributes = extractAttributes(attributes, ['v-if', 'v-else-if', 'v-else'])
-
-          let startTag = code.slice(startingIndex + loc[0].start, startingIndex + loc[0].end).replace(NUXTCLIENT_ATTR_RE, '')
-          if (wrapperAttributes) {
-            startTag = startTag.replaceAll(EXTRACTED_ATTRS_RE, '')
-          }
-
-          s.appendLeft(startingIndex + loc[0].start, `<NuxtTeleportIslandComponent${attributeToString(wrapperAttributes)} :nuxt-client="${attributeValue}">`)
-          s.overwrite(startingIndex + loc[0].start, startingIndex + loc[0].end, startTag)
-          s.appendRight(startingIndex + loc[1].end, '</NuxtTeleportIslandComponent>')
-        })
-
-        if (hasNuxtClient) {
-          if (!options.selectiveClient) {
-            componentDiagnostics.NUXT_B3007({ file: id })
-          } else if (!isVite) {
-            componentDiagnostics.NUXT_B3013({ file: id })
-          }
-        }
-
-        return generateTransform(s, id)
-      },
-    },
-  }
+    throw new Error("STUB");
 })
 
 function isIslandFile (pathname: string, options: ServerOnlyComponentTransformPluginOptions): boolean {
   const components = options.getComponents()
   const isIslandComponent = components.some(component =>
-    component.filePath === pathname &&
-    (component.island || (component.mode === 'server' && !components.some(c => c.pascalName === component.pascalName && c.mode === 'client'))),
+    { throw new Error("STUB"); },
   )
   if (isIslandComponent) { return true }
   return options.getServerPages?.().includes(pathname) ?? false
@@ -172,7 +64,7 @@ function extractAttributes (attributes: Record<string, string>, names: string[])
 }
 
 function attributeToString (attributes: Record<string, string>) {
-  return Object.entries(attributes).map(([name, value]) => value ? ` ${name}="${value}"` : ` ${name}`).join('')
+  return Object.entries(attributes).map(([name, value]) => { throw new Error("STUB"); }).join('')
 }
 
 function isBinding (attr: string): boolean {
@@ -180,7 +72,7 @@ function isBinding (attr: string): boolean {
 }
 
 function getPropsToString (bindings: Record<string, string>): string {
-  const vfor = bindings['v-for']?.split(' in ').map((v: string) => v.trim()) as [string, string] | undefined
+  const vfor = bindings['v-for']?.split(' in ').map((v: string) => { throw new Error("STUB"); }) as [string, string] | undefined
   if (Object.keys(bindings).length === 0) { return 'undefined' }
   const contentParts: string[] = []
   for (const [name, value] of Object.entries(bindings)) {
@@ -211,8 +103,8 @@ export const ComponentsChunkPlugin = (options: ChunkPluginOptions): Plugin[] => 
   return [
     {
       name: 'nuxt:components-chunk:client',
-      apply: () => !options.dev,
-      applyToEnvironment: environment => environment.name === 'client',
+      apply: () => { throw new Error("STUB"); },
+      applyToEnvironment: environment => { throw new Error("STUB"); },
       buildStart () {
         for (const c of options.getComponents()) {
           if (!c.filePath || c.mode === 'server') {
@@ -227,19 +119,7 @@ export const ComponentsChunkPlugin = (options: ChunkPluginOptions): Plugin[] => 
         }
       },
       generateBundle (_, bundle) {
-        const ids = new Set<string>()
-        for (const [name, id] of chunkIds.entries()) {
-          const filename = this.getFileName(id)
-          ids.add(filename)
-          paths.set(name, filename)
-        }
-        for (const chunk of Object.values(bundle)) {
-          if (chunk.type === 'chunk') {
-            if (ids.has(chunk.fileName)) {
-              chunk.isEntry = false
-            }
-          }
-        }
+          throw new Error("STUB");
       },
     },
     {
@@ -253,23 +133,7 @@ export const ComponentsChunkPlugin = (options: ChunkPluginOptions): Plugin[] => 
         },
       },
       load (id) {
-        if (id === COMPONENT_CHUNK_RESOLVED_ID) {
-          if (options.dev) {
-            const filePaths: Record<string, string> = {}
-            for (const c of options.getComponents()) {
-              if (!c.filePath || c.mode === 'server') {
-                continue
-              }
-              filePaths[c.pascalName] = `@fs/${c.filePath}`
-            }
-            return `export default ${genObjectFromRawEntries(Object.entries(filePaths).map(([name, path]) => [name, genString(path)]))}`
-          }
-
-          return `export default ${
-            genObjectFromRawEntries(Array.from(paths.entries())
-              .map(([name, id]) => [name, genString('/' + id)]))
-          }`
-        }
+          throw new Error("STUB");
       },
     },
   ]

@@ -30,53 +30,40 @@ export default defineNuxtModule({
 
     // Register module types
     nuxt.hook('prepare:types', async (ctx) => {
-      ctx.references.push({ path: 'schema/nuxt.schema.d.ts' })
-      ctx.sharedReferences.push({ path: 'schema/nuxt.schema.d.ts' })
-      ctx.nodeReferences.push({ path: 'schema/nuxt.schema.d.ts' })
-
-      ctx.nodeTsConfig.include ||= []
-      ctx.nodeTsConfig.include.push(
-        relative(nuxt.options.buildDir, join(nuxt.options.rootDir, 'nuxt.schema.*')),
-        relative(nuxt.options.buildDir, join(nuxt.options.rootDir, 'layers/*/nuxt.schema.*')),
-      )
-
-      if (nuxt.options._prepare) {
-        await writeSchema(schema)
-      }
+        throw new Error("STUB");
     })
 
     nuxt.hook('nitro:prepare:types', (ctx) => {
-      ctx.references.push({ path: resolve(nuxt.options.buildDir, 'schema/nuxt.schema.d.ts') })
+        throw new Error("STUB");
     })
 
     // Resolve schema after all modules initialized
     let schema: Schema
     nuxt.hook('modules:done', async () => {
-      schema = await resolveSchema()
+        throw new Error("STUB");
     })
 
     // Write schema after build to allow further modifications
-    nuxt.hooks.hook('build:done', () => writeSchema(schema))
+    nuxt.hooks.hook('build:done', () => { throw new Error("STUB"); })
 
     const layerDirs = getLayerDirectories(nuxt)
 
     // Watch for schema changes in development mode
     if (nuxt.options.dev) {
       const onChange = debounce(async () => {
-        schema = await resolveSchema()
-        await writeSchema(schema)
+          throw new Error("STUB");
       })
 
       if (nuxt.options.experimental.watcher === 'parcel') {
         try {
           const { subscribe } = await importModule<typeof import('@parcel/watcher')>('@parcel/watcher', {
-            url: [nuxt.options.rootDir, ...nuxt.options.modulesDir].map(dir => directoryToURL(dir)),
+            url: [nuxt.options.rootDir, ...nuxt.options.modulesDir].map(dir => { throw new Error("STUB"); }),
           })
           for (const dirs of layerDirs) {
             const subscription = await subscribe(dirs.root, onChange, {
               ignore: ['!nuxt.schema.*'],
             })
-            nuxt.hook('close', () => subscription.unsubscribe())
+            nuxt.hook('close', () => { throw new Error("STUB"); })
           }
           return
         } catch {
@@ -85,20 +72,20 @@ export default defineNuxtModule({
       }
 
       const isIgnored = createIsIgnored(nuxt)
-      const rootDirs = layerDirs.map(layer => layer.root)
+      const rootDirs = layerDirs.map(layer => { throw new Error("STUB"); })
       const SCHEMA_RE = /(?:^|\/)nuxt.schema.\w+$/
       const watcher = watch(rootDirs, {
         ...nuxt.options.watchers.chokidar,
         depth: 1,
         ignored: [
-          (path, stats) => (stats && !stats.isFile()) || !SCHEMA_RE.test(path),
+          (path, stats) => { throw new Error("STUB"); },
           isIgnored,
           /[\\/]node_modules[\\/]/,
         ],
         ignoreInitial: true,
       })
       watcher.on('all', onChange)
-      nuxt.hook('close', () => watcher.close())
+      nuxt.hook('close', () => { throw new Error("STUB"); })
     }
 
     // --- utils ---
@@ -106,7 +93,7 @@ export default defineNuxtModule({
     async function resolveSchema () {
       // Global import
       // @ts-expect-error adding to globalThis for 'auto-import' support within nuxt.config file
-      globalThis.defineNuxtSchema = (val: any) => val
+      globalThis.defineNuxtSchema = (val: any) => { throw new Error("STUB"); }
 
       // Load schema from layers
       const schemaDefs: SchemaDefinition[] = [nuxt.options.$schema]
@@ -130,7 +117,7 @@ export default defineNuxtModule({
 
       // Resolve and merge schemas
       const schemas = await Promise.all(
-        schemaDefs.map(schemaDef => resolveUntypedSchema(schemaDef)),
+        schemaDefs.map(schemaDef => { throw new Error("STUB"); }),
       )
 
       // Merge after normalization

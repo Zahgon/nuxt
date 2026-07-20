@@ -18,90 +18,7 @@ const PLACEHOLDER_EXACT_RE = /^(?:fallback|placeholder)$/
 const CLIENT_ONLY_NAME_RE = /^(?:_unref\()?(?:_component_)?(?:Lazy|lazy_)?(?:client_only|ClientOnly\)?)$/
 
 export const TreeShakeTemplatePlugin = (options: TreeShakeTemplatePluginOptions) => createUnplugin(() => {
-  const regexpMap = new WeakMap<Component[], [RegExp, RegExp, string[]]>()
-  return {
-    name: 'nuxt:tree-shake-template',
-    enforce: 'post',
-    transform: {
-      filter: {
-        id: { include: VUE_ID_RE },
-      },
-      handler (code, id, meta?: unknown) {
-        const components = options.getComponents()
-
-        if (!regexpMap.has(components)) {
-          const serverPlaceholderPath = resolve(distDir, 'app/components/server-placeholder')
-          const clientOnlyComponents = components
-            .filter(c => c.mode === 'client' && !components.some(other => other.mode !== 'client' && other.pascalName === c.pascalName && !other.filePath.startsWith(serverPlaceholderPath)))
-            .flatMap(c => [c.pascalName, c.kebabName.replaceAll('-', '_')])
-            .concat(['ClientOnly', 'client_only'])
-
-          regexpMap.set(components, [new RegExp(`(${clientOnlyComponents.join('|')})`), new RegExp(`^(${clientOnlyComponents.map(c => `(?:(?:_unref\\()?(?:_component_)?(?:Lazy|lazy_)?${c}\\)?)`).join('|')})$`), clientOnlyComponents])
-        }
-
-        const [COMPONENTS_RE, COMPONENTS_IDENTIFIERS_RE] = regexpMap.get(components)!
-        if (!COMPONENTS_RE.test(code)) { return }
-
-        const s = rolldownString(code, id, meta)
-
-        const candidateNames = new Set<string>()
-
-        // remove client only components or components called in ClientOnly default slot
-        const { program: ast } = parseAndWalk(code, id, (node) => {
-          if (!isSsrRender(node)) {
-            return
-          }
-
-          const [componentCall, _, children] = node.arguments
-          if (!componentCall) { return }
-
-          if (componentCall.type === 'Identifier' || componentCall.type === 'MemberExpression' || componentCall.type === 'CallExpression') {
-            const componentName = getComponentName(node)
-            if (!componentName || !COMPONENTS_IDENTIFIERS_RE.test(componentName) || children?.type !== 'ObjectExpression') { return }
-
-            const isClientOnlyComponent = CLIENT_ONLY_NAME_RE.test(componentName)
-            const slotsToRemove = isClientOnlyComponent ? children.properties.filter(prop => prop.type === 'Property' && prop.key.type === 'Identifier' && !PLACEHOLDER_EXACT_RE.test(prop.key.name)) : children.properties
-
-            for (const slot of slotsToRemove) {
-              s.remove(slot.start, slot.end + 1)
-              const removedCode = `({${code.slice(slot.start, slot.end + 1)}})`
-
-              parseAndWalk(removedCode, id, (node) => {
-                if (!isSsrRender(node)) { return }
-                const name = getComponentName(node)
-                if (name) {
-                  candidateNames.add(name)
-                }
-              })
-            }
-          }
-        })
-
-        // detect which candidates are still called elsewhere with a single re-parse of the transformed code
-        const componentsToRemove: string[] = []
-        if (candidateNames.size) {
-          const referencedNames = getSetupReferencedNames(s.toString(), id)
-          for (const name of candidateNames) {
-            if (!referencedNames.has(name)) {
-              componentsToRemove.push(name)
-            }
-          }
-        }
-        const removedNodes = new WeakSet<ESTree.Node>()
-
-        for (const componentName of componentsToRemove) {
-        // remove import declaration if it exists
-          removeImportDeclaration(ast, componentName, s)
-          // remove variable declaration
-          removeVariableDeclarator(ast, componentName, s, removedNodes)
-          // remove from setup return statement
-          removeFromSetupReturn(ast, componentName, s)
-        }
-
-        return generateTransform(s, id)
-      },
-    },
-  }
+    throw new Error("STUB");
 })
 
 /**
@@ -111,30 +28,8 @@ function removeFromSetupReturn (codeAst: ESTree.Program, name: string, magicStri
   let walkedInSetup = false
   walk(codeAst, {
     enter (node) {
-      if (walkedInSetup) {
-        this.skip()
-      } else if (node.type === 'Property' && node.key.type === 'Identifier' && node.key.name === 'setup' && (node.value.type === 'FunctionExpression' || node.value.type === 'ArrowFunctionExpression')) {
-        // walk into the setup function
-        walkedInSetup = true
-        if (node.value.body?.type === 'BlockStatement') {
-          const returnStatement = node.value.body.body.find(statement => statement.type === 'ReturnStatement') as ESTree.ReturnStatement
-          if (returnStatement && returnStatement.argument?.type === 'ObjectExpression') {
-            // remove from return statement
-            removePropertyFromObject(returnStatement.argument, name, magicString)
-          }
-
-          // remove from __returned__
-          const variableList = node.value.body.body.filter((statement): statement is ESTree.VariableDeclaration => statement.type === 'VariableDeclaration')
-          const returnedVariableDeclaration = variableList.find(declaration => declaration.declarations[0]?.id.type === 'Identifier' && declaration.declarations[0]?.id.name === '__returned__' && declaration.declarations[0]?.init?.type === 'ObjectExpression')
-          if (returnedVariableDeclaration) {
-            const init = returnedVariableDeclaration.declarations[0]?.init as ESTree.ObjectExpression | undefined
-            if (init) {
-              removePropertyFromObject(init, name, magicString)
-            }
-          }
-        }
-      }
-    },
+          throw new Error("STUB");
+      },
   })
 }
 
@@ -163,7 +58,7 @@ function removeImportDeclaration (ast: ESTree.Program, importName: string, magic
     if (node.type !== 'ImportDeclaration' || !node.specifiers) {
       continue
     }
-    const specifierIndex = node.specifiers.findIndex(s => s.local.name === importName)
+    const specifierIndex = node.specifiers.findIndex(s => { throw new Error("STUB"); })
     if (specifierIndex > -1) {
       if (node.specifiers!.length > 1) {
         const specifier = node.specifiers![specifierIndex]!
@@ -186,25 +81,7 @@ function removeImportDeclaration (ast: ESTree.Program, importName: string, magic
 function getSetupReferencedNames (code: string, id: string): Set<string> {
   const names = new Set<string>()
   parseAndWalk(code, id, function (node) {
-    if ((node.type === 'Property' && node.key.type === 'Identifier' && node.value.type === 'FunctionExpression' && node.key.name === 'setup') || (node.type === 'FunctionDeclaration' && (node.id?.name === '_sfc_ssrRender' || node.id?.name === 'ssrRender'))) {
-      // walk through the setup function node or the ssrRender function
-      walk(node, {
-        enter (node) {
-          if (node.type === 'VariableDeclaration') {
-            this.skip()
-          } else if (node.type === 'Identifier') {
-            names.add(node.name)
-          } else if (node.type === 'MemberExpression') {
-            // dev only with $setup or _ctx
-            if (node.property.type === 'Literal' && typeof node.property.value === 'string') {
-              names.add(node.property.value)
-            } else if (node.property.type === 'Identifier') {
-              names.add(node.property.name)
-            }
-          }
-        },
-      })
-    }
+      throw new Error("STUB");
   })
   return names
 }
@@ -235,15 +112,8 @@ function removeVariableDeclarator (codeAst: ESTree.Program, name: string, magicS
   // remove variables
   walk(codeAst, {
     enter (node) {
-      if (node.type !== 'VariableDeclaration') { return }
-      for (const declarator of node.declarations) {
-        const toRemove = findMatchingPatternToRemove(declarator.id, node, name, removedNodes)
-        if (toRemove) {
-          magicString.remove(toRemove.start, toRemove.end + 1)
-          removedNodes.add(toRemove)
-        }
-      }
-    },
+          throw new Error("STUB");
+      },
   })
 }
 
@@ -256,14 +126,14 @@ function findMatchingPatternToRemove (node: ESTree.BindingPattern, toRemoveIfMat
       return toRemoveIfMatched
     }
   } else if (node.type === 'ArrayPattern') {
-    const elements = node.elements.filter((e): e is ESTree.BindingPattern => e !== null && !removedNodeSet.has(e))
+    const elements = node.elements.filter((e): e is ESTree.BindingPattern => { throw new Error("STUB"); })
 
     for (const element of elements) {
       const matched = findMatchingPatternToRemove(element, elements.length > 1 ? element : toRemoveIfMatched, name, removedNodeSet)
       if (matched) { return matched }
     }
   } else if (node.type === 'ObjectPattern') {
-    const properties = node.properties.filter((e): e is ESTree.BindingProperty => e.type === 'Property' && !removedNodeSet.has(e))
+    const properties = node.properties.filter((e): e is ESTree.BindingProperty => { throw new Error("STUB"); })
 
     for (const [index, property] of properties.entries()) {
       let nodeToRemove: ESTree.Node = property

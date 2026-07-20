@@ -19,31 +19,18 @@ function parseRevivedData (data: string) {
 }
 
 const revivers: [string, (data: any) => any][] = [
-  ['NuxtError', data => createError(data)],
-  ['EmptyShallowRef', data => shallowRef(data === '_' ? undefined : data === '0n' ? BigInt(0) : parseRevivedData(data))],
-  ['EmptyRef', data => ref(data === '_' ? undefined : data === '0n' ? BigInt(0) : parseRevivedData(data))],
-  ['ShallowRef', data => shallowRef(data)],
-  ['ShallowReactive', data => shallowReactive(data)],
-  ['Ref', data => ref(data)],
-  ['Reactive', data => reactive(data)],
+  ['NuxtError', data => { throw new Error("STUB"); }],
+  ['EmptyShallowRef', data => { throw new Error("STUB"); }],
+  ['EmptyRef', data => { throw new Error("STUB"); }],
+  ['ShallowRef', data => { throw new Error("STUB"); }],
+  ['ShallowReactive', data => { throw new Error("STUB"); }],
+  ['Ref', data => { throw new Error("STUB"); }],
+  ['Reactive', data => { throw new Error("STUB"); }],
 ]
 
 if (componentIslands) {
   revivers.push(['Island', ({ key, params, result }: any) => {
-    const nuxtApp = useNuxtApp()
-    if (!nuxtApp.isHydrating) {
-      nuxtApp.payload.data[key] ||= $fetch(`/__nuxt_island/${key}.json`, {
-        responseType: 'json',
-        ...params ? { params } : {},
-      }).then((r) => {
-        nuxtApp.payload.data[key] = r
-        return r
-      })
-    }
-    return {
-      html: '',
-      ...result,
-    }
+      throw new Error("STUB");
   }])
 }
 

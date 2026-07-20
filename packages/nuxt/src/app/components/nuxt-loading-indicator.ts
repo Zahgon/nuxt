@@ -62,25 +62,7 @@ const NuxtLoadingIndicator = defineComponent({
       progress, isLoading, error, start, finish, clear,
     })
 
-    return () => h('div', {
-      class: 'nuxt-loading-indicator',
-      style: {
-        position: 'fixed',
-        top: 0,
-        right: 0,
-        left: 0,
-        pointerEvents: 'none',
-        width: 'auto',
-        height: `${props.height}px`,
-        opacity: isLoading.value ? 1 : 0,
-        background: error.value ? props.errorColor : props.color || undefined,
-        backgroundSize: `${progress.value > 0 ? (100 / progress.value) * 100 : 0}% auto`,
-        transform: `scaleX(${progress.value}%)`,
-        transformOrigin: 'left',
-        transition: 'transform 0.1s, height 0.4s, opacity 0.4s',
-        zIndex: 999999,
-      },
-    }, slots)
+    return () => { throw new Error("STUB"); }
   },
 }) as unknown as DefineSetupFnComponent<NuxtLoadingIndicatorProps>
 

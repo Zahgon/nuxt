@@ -24,7 +24,7 @@ const SLOT_FALLBACK_RE = / data-island-slot="([^"]*)"[^>]*>/g
 const ISLAND_SCOPE_ID_RE = /^<[^> ]*/
 
 let id = 1
-const getId = import.meta.client ? () => (id++).toString() : randomUUID
+const getId = import.meta.client ? () => { throw new Error("STUB"); } : randomUUID
 
 const components = import.meta.client ? new Map<string, Component>() : undefined
 
@@ -36,9 +36,7 @@ async function loadComponents (source = appBaseURL, paths: NuxtIslandResponse['c
   for (const [component, item] of Object.entries(paths)) {
     if (!(components!.has(component))) {
       promises.push((async () => {
-        const chunkSource = joinURL(source, item.chunk)
-        const c = await import(/* @vite-ignore */ chunkSource).then(m => m.default || m)
-        components!.set(component, c)
+          throw new Error("STUB");
       })())
     }
   }
@@ -76,19 +74,19 @@ const NuxtIsland = defineComponent({
     lazy: Boolean,
     props: {
       type: Object,
-      default: () => undefined,
+      default: () => { throw new Error("STUB"); },
     },
     context: {
       type: Object,
-      default: () => ({}),
+      default: () => { throw new Error("STUB"); },
     },
     scopeId: {
       type: String as PropType<string | undefined | null>,
-      default: () => undefined,
+      default: () => { throw new Error("STUB"); },
     },
     source: {
       type: String,
-      default: () => undefined,
+      default: () => { throw new Error("STUB"); },
     },
     dangerouslyLoadClientComponents: {
       type: Boolean,
@@ -100,20 +98,24 @@ const NuxtIsland = defineComponent({
     let canTeleport = import.meta.server
     const teleportKey = shallowRef(0)
     const key = shallowRef(0)
-    const canLoadClientComponent = computed(() => selectiveClient && (props.dangerouslyLoadClientComponents || !props.source))
+    const canLoadClientComponent = computed(() => { throw new Error("STUB"); })
     const error = ref<unknown>(null)
     const config = useRuntimeConfig()
     const nuxtApp = useNuxtApp()
-    const serializedProps = computed(() => serializeIslandProps(props.props))
-    const hashId = computed(() => getIslandHash({ name: props.name, props: serializedProps.value, context: props.context, source: props.source }))
+    const serializedProps = computed(() => { throw new Error("STUB"); })
+    const hashId = computed(() => { throw new Error("STUB"); })
     const instance = getCurrentInstance()!
     const event = useRequestEvent()
 
     let activeHead: ActiveHeadEntry<SerializableHead>
 
     const mounted = shallowRef(false)
-    onMounted(() => { mounted.value = true; teleportKey.value++ })
-    onBeforeUnmount(() => { if (activeHead) { activeHead.dispose() } })
+    onMounted(() => {
+        throw new Error("STUB");
+    })
+    onBeforeUnmount(() => {
+        throw new Error("STUB");
+    })
     function setPayload (key: string, result: NuxtIslandResponse) {
       const toRevive: Partial<NuxtIslandResponse> = {}
       if (result.props) { toRevive.props = result.props }
@@ -177,31 +179,9 @@ const NuxtIsland = defineComponent({
     const uid = ref<string>(ssrHTML.value.match(SSR_UID_RE)?.[1] || getId())
 
     const currentSlots = new Set(Object.keys(slots))
-    const availableSlots = computed(() => new Set([...ssrHTML.value.matchAll(SLOTNAME_RE)].map(m => m[1])))
+    const availableSlots = computed(() => { throw new Error("STUB"); })
     const html = computed(() => {
-      let html = ssrHTML.value
-
-      if (props.scopeId) {
-        html = html.replace(ISLAND_SCOPE_ID_RE, full => full + ' ' + props.scopeId)
-      }
-
-      if (import.meta.client && !canLoadClientComponent.value) {
-        for (const [key, value] of Object.entries(payloads.components || {})) {
-          html = html.replace(new RegExp(` data-island-uid="${uid.value}" data-island-component="${key}"[^>]*>`), (full) => {
-            return full + value.html
-          })
-        }
-      }
-
-      if (payloads.slots) {
-        return html.replaceAll(SLOT_FALLBACK_RE, (full, slotName) => {
-          if (!currentSlots.has(slotName)) {
-            return full + (payloads.slots?.[slotName]?.fallback || '')
-          }
-          return full
-        })
-      }
-      return html
+        throw new Error("STUB");
     })
 
     const head = injectHead()
@@ -214,7 +194,7 @@ const NuxtIsland = defineComponent({
       const url = remoteComponentIslands && props.source ? joinURL(props.source, `/__nuxt_island/${key}.json`) : `/__nuxt_island/${key}.json`
       if (import.meta.server && import.meta.prerender) {
         // Hint to Nitro to prerender the island component
-        nuxtApp.runWithContext(() => prerenderRoutes(url))
+        nuxtApp.runWithContext(() => { throw new Error("STUB"); })
       }
       // TODO: Validate response
       const r = await fetch(withQuery(((import.meta.dev && import.meta.client) || props.source) ? url : joinURL(config.app.baseURL ?? '', url), {
@@ -246,7 +226,7 @@ const NuxtIsland = defineComponent({
     async function fetchComponent (force = false) {
       nuxtApp[pKey] ||= {}
       nuxtApp[pKey][uid.value] ||= _fetchComponent(force).finally(() => {
-        delete nuxtApp[pKey]![uid.value]
+          throw new Error("STUB");
       })
       try {
         const res: NuxtIslandResponse = await nuxtApp[pKey][uid.value]
@@ -285,8 +265,7 @@ const NuxtIsland = defineComponent({
         if (import.meta.client) {
           // must await next tick for Teleport to work correctly with static node re-rendering
           nextTick(() => {
-            canTeleport = true
-            teleportKey.value++
+              throw new Error("STUB");
           })
         }
       } catch (e) {
@@ -296,17 +275,17 @@ const NuxtIsland = defineComponent({
     }
 
     expose({
-      refresh: () => fetchComponent(true),
+      refresh: () => { throw new Error("STUB"); },
     })
 
     if (import.meta.hot) {
       import.meta.hot.on(`nuxt-server-component:${props.name}`, () => {
-        fetchComponent(true)
+          throw new Error("STUB");
       })
     }
 
     if (import.meta.client) {
-      watch(props, debounce(() => fetchComponent(), 100), { deep: true })
+      watch(props, debounce(() => { throw new Error("STUB"); }, 100), { deep: true })
     }
 
     // Restore head entries from SSR payload during hydration
@@ -326,64 +305,7 @@ const NuxtIsland = defineComponent({
     }
 
     return (_ctx: any, _cache: any) => {
-      if (!html.value || error.value) {
-        return [slots.fallback?.({ error: error.value }) ?? createVNode('div')]
-      }
-      return [
-        withMemo([key.value], () => {
-          return createVNode(Fragment, { key: key.value }, [h(createStaticVNode(html.value || '<div></div>', 1))])
-        }, _cache, 0),
-
-        // should away be triggered ONE tick after re-rendering the static node
-        withMemo([teleportKey.value], () => {
-          const teleports: Array<VNode> = []
-          // this is used to force trigger Teleport when vue makes the diff between old and new node
-          const isKeyOdd = teleportKey.value === 0 || !!(teleportKey.value && !(teleportKey.value % 2))
-
-          if (uid.value && html.value && (import.meta.server || props.lazy ? canTeleport : (mounted.value || instance.vnode?.el))) {
-            for (const slot in slots) {
-              if (availableSlots.value.has(slot)) {
-                teleports.push(createVNode(Teleport,
-                  // use different selectors for even and odd teleportKey to force trigger the teleport
-                  { to: import.meta.client ? `${isKeyOdd ? 'div' : ''}[data-island-uid="${uid.value}"][data-island-slot="${slot}"]` : `uid=${uid.value};slot=${slot}` },
-                  { default: () => (payloads.slots?.[slot]?.props?.length ? payloads.slots[slot].props : [{}]).map((data: any) => slots[slot]?.(data)) }),
-                )
-              }
-            }
-            if (selectiveClient) {
-              if (import.meta.server) {
-                if (payloads.components) {
-                  for (const [id, info] of Object.entries(payloads.components)) {
-                    const { html, slots, uid: targetUID = uid.value } = info
-                    let replaced = html.replaceAll('data-island-uid', `data-island-uid="${uid.value}"`)
-                    for (const slot in slots) {
-                      replaced = replaced.replaceAll(`data-island-slot="${slot}">`, full => full + slots[slot])
-                    }
-                    teleports.push(createVNode(Teleport, { to: `uid=${targetUID};client=${id}` }, {
-                      default: () => [createStaticVNode(replaced, 1)],
-                    }))
-                  }
-                }
-              } else if (canLoadClientComponent.value && payloads.components) {
-                for (const [id, info] of Object.entries(payloads.components)) {
-                  const { props, slots, uid: targetUID = uid.value } = info
-                  const component = components!.get(id)!
-                  // use different selectors for even and odd teleportKey to force trigger the teleport
-                  const vnode = createVNode(Teleport, { to: `${isKeyOdd ? 'div' : ''}[data-island-uid='${targetUID}'][data-island-component="${id}"]` }, {
-                    default: () => {
-                      return [h(component, props, Object.fromEntries(Object.entries(slots || {}).map(([k, v]) => ([k, () => createStaticVNode(`<div style="display: contents" data-island-uid data-island-slot="${k}">${v}</div>`, 1),
-                      ]))))]
-                    },
-                  })
-                  teleports.push(vnode)
-                }
-              }
-            }
-          }
-
-          return h(Fragment, teleports)
-        }, _cache, 1),
-      ]
+        throw new Error("STUB");
     }
   },
 }) as unknown as DefineSetupFnComponent<NuxtIslandProps, NuxtIslandEmits, NuxtIslandSlots>

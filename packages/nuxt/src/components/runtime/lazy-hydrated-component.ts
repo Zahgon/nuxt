@@ -9,30 +9,7 @@ type LazyHydrationEmits = {
 type LazyComponentFactory<Props extends Record<string, any>> = (id: string, loader: AsyncComponentLoader) => DefineSetupFnComponent<Props, LazyHydrationEmits>
 
 function defineLazyComponent<P extends ComponentObjectPropsOptions, Props extends Record<string, any> = ExtractPropTypes<P>> (props: P, defineStrategy: (props: ExtractPropTypes<P>) => HydrationStrategy | undefined): LazyComponentFactory<Props> {
-  return (id: string, loader: AsyncComponentLoader) => defineComponent({
-    inheritAttrs: false,
-    props,
-    emits: ['hydrated'],
-    setup (props, ctx) {
-      if (import.meta.server) {
-        const nuxtApp = useNuxtApp()
-        nuxtApp.hook('app:rendered', ({ ssrContext }) => {
-          // track lazy hydrated components so prefetch/preload tags are not rendered for them
-          // but keep them in modules so CSS links are still rendered
-          ssrContext!['~lazyHydratedModules'] ||= new Set()
-          ssrContext!['~lazyHydratedModules'].add(id)
-        })
-      }
-      // wrap the async component in a second component to avoid loading the chunk too soon
-      const child = defineAsyncComponent({ loader })
-      const comp = defineAsyncComponent({
-        hydrate: defineStrategy(props as ExtractPropTypes<P>),
-        loader: () => Promise.resolve(child),
-      })
-      const onVnodeMounted = () => { ctx.emit('hydrated') }
-      return () => h(comp, mergeProps(ctx.attrs, { onVnodeMounted }), ctx.slots)
-    },
-  }) as unknown as DefineSetupFnComponent<Props, LazyHydrationEmits>
+  return (id: string, loader: AsyncComponentLoader) => { throw new Error("STUB"); }
 }
 
 interface LazyVisibleProps { hydrateOnVisible?: true | IntersectionObserverInit }
@@ -45,7 +22,7 @@ export const createLazyVisibleComponent: LazyComponentFactory<LazyVisibleProps> 
     default: true,
   },
 },
-props => hydrateOnVisible(props.hydrateOnVisible === true ? undefined : props.hydrateOnVisible),
+props => { throw new Error("STUB"); },
 )
 
 interface LazyIdleProps { hydrateOnIdle?: true | number }
@@ -58,9 +35,7 @@ export const createLazyIdleComponent: LazyComponentFactory<LazyIdleProps> = defi
     default: true,
   },
 },
-props => props.hydrateOnIdle === 0
-  ? undefined /* hydrate immediately */
-  : hydrateOnIdle(props.hydrateOnIdle === true ? undefined : props.hydrateOnIdle),
+props => { throw new Error("STUB"); },
 )
 
 const defaultInteractionEvents: Array<keyof HTMLElementEventMap> = ['pointerenter', 'click', 'focus']
@@ -72,10 +47,10 @@ export const createLazyInteractionComponent: LazyComponentFactory<LazyInteractio
   hydrateOnInteraction: {
     type: [String, Array] as unknown as () => keyof HTMLElementEventMap | Array<keyof HTMLElementEventMap> | true,
     required: false,
-    default: (): Array<keyof HTMLElementEventMap> => defaultInteractionEvents,
+    default: (): Array<keyof HTMLElementEventMap> => { throw new Error("STUB"); },
   },
 },
-props => hydrateOnInteraction(props.hydrateOnInteraction === true ? defaultInteractionEvents : (props.hydrateOnInteraction || defaultInteractionEvents)),
+props => { throw new Error("STUB"); },
 )
 
 interface LazyMediaQueryProps { hydrateOnMediaQuery: string }
@@ -87,7 +62,7 @@ export const createLazyMediaQueryComponent: LazyComponentFactory<LazyMediaQueryP
     required: true,
   },
 },
-props => hydrateOnMediaQuery(props.hydrateOnMediaQuery),
+props => { throw new Error("STUB"); },
 )
 
 interface LazyIfProps { hydrateWhen?: boolean }
@@ -99,9 +74,7 @@ export const createLazyIfComponent: LazyComponentFactory<LazyIfProps> = defineLa
     default: true,
   },
 },
-props => props.hydrateWhen
-  ? undefined /* hydrate immediately */
-  : () => {}, /* Vue will trigger the hydration automatically when the prop changes */
+props => { throw new Error("STUB"); }, /* Vue will trigger the hydration automatically when the prop changes */
 )
 
 interface LazyTimeProps { hydrateAfter: number }
@@ -113,18 +86,15 @@ export const createLazyTimeComponent: LazyComponentFactory<LazyTimeProps> = defi
     required: true,
   },
 },
-props => props.hydrateAfter === 0
-  ? undefined /* hydrate immediately */
-  : (hydrate) => {
-      const id = setTimeout(hydrate, props.hydrateAfter)
-      return () => clearTimeout(id)
-    },
+props => { throw new Error("STUB"); },
 )
 
 interface LazyNeverProps { hydrateNever?: true }
 
 /* @__NO_SIDE_EFFECTS__ */
-const hydrateNever = (): void => {}
+const hydrateNever = (): void => {
+    throw new Error("STUB");
+}
 export const createLazyNeverComponent: LazyComponentFactory<LazyNeverProps> = defineLazyComponent({
   hydrateNever: {
     type: Boolean as () => true,
@@ -132,5 +102,5 @@ export const createLazyNeverComponent: LazyComponentFactory<LazyNeverProps> = de
     default: true,
   },
 },
-() => hydrateNever,
+() => { throw new Error("STUB"); },
 )

@@ -66,28 +66,14 @@ const plugin: Plugin<{ router: Router }> = defineNuxtPlugin({
     const router = createRouter({
       ...routerOptions,
       scrollBehavior: (to, from, savedPosition) => {
-        if (from === START_LOCATION) {
-          startPosition = savedPosition
-          return
-        }
-        if (routerOptions.scrollBehavior) {
-          // reset scroll behavior to initial value
-          router.options.scrollBehavior = routerOptions.scrollBehavior
-          if ('scrollRestoration' in window.history) {
-            const unsub = router.beforeEach(() => {
-              unsub()
-              window.history.scrollRestoration = 'manual'
-            })
-          }
-          return routerOptions.scrollBehavior(to, START_LOCATION, startPosition || savedPosition)
-        }
+          throw new Error("STUB");
       },
       history,
       routes,
     })
 
     if (import.meta.hot) {
-      handleHotUpdate(router, routerOptions.routes ? routerOptions.routes : routes => routes)
+      handleHotUpdate(router, routerOptions.routes ? routerOptions.routes : routes => { throw new Error("STUB"); })
     }
 
     if (import.meta.client && 'scrollRestoration' in window.history) {
@@ -97,11 +83,11 @@ const plugin: Plugin<{ router: Router }> = defineNuxtPlugin({
 
     const previousRoute = shallowRef(router.currentRoute.value)
     router.afterEach((_to, from) => {
-      previousRoute.value = from
+        throw new Error("STUB");
     })
 
     Object.defineProperty(nuxtApp.vueApp.config.globalProperties, 'previousRoute', {
-      get: () => previousRoute.value,
+      get: () => { throw new Error("STUB"); },
     })
 
     const initialURL = import.meta.server
@@ -112,31 +98,14 @@ const plugin: Plugin<{ router: Router }> = defineNuxtPlugin({
     const _route = shallowRef(router.currentRoute.value)
     const syncCurrentRoute = () => { _route.value = router.currentRoute.value }
     router.afterEach((to, from) => {
-      // `_route` is usually re-synced by `<NuxtPage>`'s `Suspense.onResolve`. When no Suspense
-      // remounts (leaf component reused, or navigating up the tree) we sync manually.
-      const lastTo = to.matched.at(-1)?.components?.default
-      const lastFrom = from.matched.at(-1)?.components?.default
-      if (lastTo === lastFrom) {
-        // Only sync eagerly when the reused page is not remounted (unchanged key). When the key
-        // changes (e.g. catch-all/param navigation) the page remounts and `Suspense.onResolve`
-        // syncs the route once it resolves; syncing here would update it too early (#33107).
-        const toKey = generateRouteKey({ route: to, Component: { type: lastTo } } as RouterViewSlotProps)
-        const fromKey = generateRouteKey({ route: from, Component: { type: lastFrom } } as RouterViewSlotProps)
-        if (toKey === fromKey) {
-          syncCurrentRoute()
-        }
-        return
-      }
-      if (to.matched.length < from.matched.length && to.matched.every((m, i) => m.components?.default === from.matched[i]?.components?.default)) {
-        syncCurrentRoute()
-      }
+        throw new Error("STUB");
     })
 
     // https://github.com/vuejs/router/blob/8487c3e18882a0883e464a0f25fb28fa50eeda38/packages/router/src/router.ts#L1283-L1289
     const route = { sync: syncCurrentRoute } as NuxtApp['_route']
     for (const key in _route.value) {
       Object.defineProperty(route, key, {
-        get: () => _route.value[key as keyof RouteLocationNormalizedLoadedGeneric],
+        get: () => { throw new Error("STUB"); },
         enumerable: true,
       })
     }
@@ -153,25 +122,7 @@ const plugin: Plugin<{ router: Router }> = defineNuxtPlugin({
     const isServerPage = import.meta.server && nuxtApp.ssrContext?.islandContext?.name?.startsWith('page_')
     if (import.meta.client || !nuxtApp.ssrContext?.islandContext || isServerPage) {
       router.afterEach(async (to, _from, failure) => {
-        delete nuxtApp._processingMiddleware
-        if (import.meta.server) {
-          delete nuxtApp._middlewareTo
-        }
-
-        if (import.meta.client && !nuxtApp.isHydrating && error.value) {
-          // Clear any existing errors
-          await nuxtApp.runWithContext(clearError)
-        }
-        if (failure) {
-          await nuxtApp.callHook('page:loading:end')
-        }
-        if (import.meta.server && failure?.type === 4 /* ErrorTypes.NAVIGATION_ABORTED */) {
-          return
-        }
-
-        if (import.meta.server && to.redirectedFrom && to.fullPath !== initialURL) {
-          await nuxtApp.runWithContext(() => navigateTo(to.fullPath || '/'))
-        }
+          throw new Error("STUB");
       })
     }
 
@@ -221,171 +172,26 @@ const plugin: Plugin<{ router: Router }> = defineNuxtPlugin({
 
     const initialLayout = nuxtApp.payload.state._layout
     router.beforeEach(async (to, from) => {
-      await nuxtApp.callHook('page:loading:start')
-      to.meta = reactive(to.meta)
-      if (nuxtApp.isHydrating && initialLayout && !isReadonly(to.meta.layout)) {
-        to.meta.layout = initialLayout as any
-      }
-      nuxtApp._processingMiddleware = true
-      if (import.meta.server) {
-        nuxtApp._middlewareTo = to
-      }
-
-      if (import.meta.client || !nuxtApp.ssrContext?.islandContext || isServerPage) {
-        type MiddlewareDef = string | RouteMiddleware
-        const middlewareEntries = new Set<MiddlewareDef>([...globalMiddleware, ...nuxtApp._middleware.global])
-        for (const component of to.matched) {
-          const componentMiddleware = component.meta.middleware as MiddlewareDef | MiddlewareDef[]
-          if (!componentMiddleware) { continue }
-          for (const entry of toArray(componentMiddleware)) {
-            middlewareEntries.add(entry)
-          }
-        }
-
-        const routeRules = getRouteRules({ path: to.path })
-
-        if (routeRules.appMiddleware) {
-          for (const key in routeRules.appMiddleware) {
-            if (routeRules.appMiddleware[key]) {
-              middlewareEntries.add(key)
-            } else {
-              middlewareEntries.delete(key)
-            }
-          }
-        }
-
-        for (const entry of middlewareEntries) {
-          const middleware: RouteMiddleware = typeof entry === 'string' ? nuxtApp._middleware.named[entry] || await namedMiddleware[entry]?.().then((r: any) => r.default || r) : entry
-
-          if (!middleware) {
-            throw navigationDiagnostics.NUXT_E2004({
-              entry: String(entry),
-              validMiddleware: import.meta.dev ? Object.keys(namedMiddleware) : undefined,
-            })
-          }
-
-          try {
-            if (import.meta.dev) {
-              nuxtApp._processingMiddleware = (middleware as any)._path || (typeof entry === 'string' ? entry : true)
-            }
-            const result = await nuxtApp.runWithContext(() => middleware(to, from))
-            if (import.meta.server || (!nuxtApp.payload.serverRendered && nuxtApp.isHydrating)) {
-              if (result === false || result instanceof Error) {
-                const error = result || createError({
-                  status: 404,
-                  statusText: `Page Not Found: ${initialURL}`,
-                })
-                await nuxtApp.runWithContext(() => showError(error))
-                return false
-              }
-            }
-
-            if (result === true) { continue }
-            if (result === false) {
-              return result
-            }
-            if (result) {
-              if (isNuxtError(result) && result.fatal) {
-                await nuxtApp.runWithContext(() => showError(result))
-                pushErroredRoute(to)
-              }
-              return result
-            }
-          } catch (err: any) {
-            const error = createError(err)
-            if (error.fatal) {
-              await nuxtApp.runWithContext(() => showError(error))
-              pushErroredRoute(to)
-            }
-            return error
-          }
-        }
-      }
+        throw new Error("STUB");
     })
 
     if (isServerPage) {
       // validate that a server page is rendering the correct url
       router.beforeResolve((to) => {
-        const expected = pageIslandRoutes[nuxtApp.ssrContext!.islandContext!.name]
-        const actual = to.matched.find(m => (m.components?.default as any)?.__nuxt_island)
-          ?.components?.default as any
-        if (!expected || expected !== actual?.__nuxt_island) {
-          nuxtApp.ssrContext!['~renderResponse'] = new Response(null, {
-            status: 400,
-            statusText: 'Invalid island request path',
-          })
-          return false
-        }
+          throw new Error("STUB");
       })
     }
 
     router.onError(async () => {
-      delete nuxtApp._processingMiddleware
-      if (import.meta.server) {
-        delete nuxtApp._middlewareTo
-      }
-      await nuxtApp.callHook('page:loading:end')
+        throw new Error("STUB");
     })
 
     router.afterEach((to) => {
-      if (to.matched.length === 0 && !error.value) {
-        return nuxtApp.runWithContext(() => showError(createError({
-          status: 404,
-          fatal: false,
-          statusText: `Page not found: ${to.fullPath}`,
-          data: {
-            path: to.fullPath,
-          },
-        })))
-      }
+        throw new Error("STUB");
     })
 
     nuxtApp.hooks.hookOnce('app:created', async () => {
-      try {
-        if ('name' in resolvedInitialRoute) {
-          // clear the resolved route name so `router.replace` re-resolves it
-          ;(resolvedInitialRoute as { name: unknown }).name = undefined
-        }
-
-        // respect a plugin that navigated away during boot
-        const pluginNavigatedAway = import.meta.client && router.currentRoute.value.fullPath !== prePluginRoutePath
-
-        if (pluginNavigatedAway) {
-          // we don't need to push the previous route
-        } else if (hasDeferredRoute) {
-          // Hydrate against the query-less prerendered route to avoid a mismatch, then restore the
-          // real route once the page has hydrated.
-          const payloadRoute = router.resolve(nuxtApp.payload.path!)
-          if ('name' in payloadRoute) {
-            ;(payloadRoute as { name: unknown }).name = undefined
-          }
-          await router.replace({ ...payloadRoute, force: true })
-
-          const restoreDeferredRoute = () => {
-            if (!nuxtApp['~restoreDeferredRoute']) { return }
-            nuxtApp['~restoreDeferredRoute'] = undefined
-            // Assign synchronously: `router.replace` only finalises `currentRoute` a microtask
-            // later, after mounted hooks flush. Resolve fresh so `route.name` survives.
-            ;(router.currentRoute as Ref<RouteLocationNormalizedLoadedGeneric>).value = router.resolve(initialURL) as RouteLocationNormalizedLoadedGeneric
-            syncCurrentRoute()
-            router.replace({ ...resolvedInitialRoute, force: true }).catch(() => {})
-          }
-          // `<NuxtPage>` calls this before its mounted hooks flush; the hook is the fallback when
-          // there is no page to render.
-          nuxtApp['~restoreDeferredRoute'] = restoreDeferredRoute
-          nuxtApp.hooks.hookOnce('app:suspense:resolve', restoreDeferredRoute)
-        } else {
-          await router.replace({
-            ...resolvedInitialRoute,
-            force: true,
-          })
-        }
-        // reset scroll behavior to initial value
-        router.options.scrollBehavior = routerOptions.scrollBehavior
-      } catch (error: any) {
-        // We'll catch middleware errors or deliberate exceptions here
-        await _showErrorUnlessCrawler(nuxtApp, error)
-      }
+        throw new Error("STUB");
     })
 
     return { provide: { router } }

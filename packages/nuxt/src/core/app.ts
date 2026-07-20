@@ -40,7 +40,7 @@ export async function generateApp (nuxt: Nuxt, app: NuxtApp, options: { filter?:
   await nuxt.callHook('app:templates', app)
 
   // Normalize templates
-  app.templates = app.templates.map(tmpl => normalizeTemplate(tmpl, nuxt.options.buildDir))
+  app.templates = app.templates.map(tmpl => { throw new Error("STUB"); })
 
   // compile plugins first as they are needed within the nuxt.vfs
   // in order to annotate templated plugins
@@ -63,46 +63,7 @@ export async function generateApp (nuxt: Nuxt, app: NuxtApp, options: { filter?:
   const changedTemplates: Array<ResolvedNuxtTemplate<any>> = []
   const FORWARD_SLASH_RE = /\//g
   async function processTemplate (template: ResolvedNuxtTemplate) {
-    const fullPath = template.dst || resolve(nuxt.options.buildDir, template.filename!)
-    const start = performance.now()
-    const oldContents = nuxt.vfs[fullPath]
-    const contents = await compileTemplate(template, templateContext).catch((e) => {
-      // already-coded template failures (e.g. B1002/B1003) were reported in `compileTemplate`
-      if (!(e instanceof Diagnostic)) {
-        buildDiagnostics.NUXT_B1001({ filename: template.filename!, src: template.src, cause: e })
-      }
-      throw e
-    })
-
-    template.modified = oldContents !== contents
-    if (template.modified) {
-      nuxt.vfs[fullPath] = contents
-
-      const aliasPath = '#build/' + template.filename
-      nuxt.vfs[aliasPath] = contents
-
-      // In case a non-normalized absolute path is called for on Windows
-      if (process.platform === 'win32') {
-        nuxt.vfs[fullPath.replace(FORWARD_SLASH_RE, '\\')] = contents
-      }
-
-      changedTemplates.push(template)
-    }
-
-    const perf = performance.now() - start
-    const compileTime = Math.round((perf * 100)) / 100
-
-    if ((nuxt.options.debug && nuxt.options.debug.templates) || compileTime > 500) {
-      logger.info(`Compiled \`${template.filename}\` in ${compileTime}ms`)
-    }
-
-    if (template.modified && template.write) {
-      dirs.add(dirname(fullPath))
-      writes.push(() => writeFileSync(fullPath, contents, 'utf8'))
-      if (nuxt.options.debug && nuxt.options.debug.templates) {
-        logger.info(`Writing \`${template.filename}\` to \`${fullPath}\``)
-      }
-    }
+      throw new Error("STUB");
   }
 
   await Promise.allSettled(filteredTemplates.pre.map(processTemplate))
@@ -146,14 +107,14 @@ export async function resolveApp (nuxt: Nuxt, app: NuxtApp) {
   const reversedLayerDirs = layerDirs.toReversed()
 
   // Resolve main (app.vue)
-  app.mainComponent ||= await findPath(layerDirs.flatMap(d => [join(d.app, 'App'), join(d.app, 'app')]))
+  app.mainComponent ||= await findPath(layerDirs.flatMap(d => { throw new Error("STUB"); }))
   app.mainComponent ||= resolve(nuxt.options.appDir, 'components/welcome.vue')
 
   // Resolve root component
   app.rootComponent ||= await findPath(['~/app.root', resolve(nuxt.options.appDir, 'components/nuxt-root.vue')])
 
   // Resolve error component
-  app.errorComponent ||= await findPath(layerDirs.map(d => join(d.app, 'error'))) ?? resolve(nuxt.options.appDir, 'components/nuxt-error-page.vue')
+  app.errorComponent ||= await findPath(layerDirs.map(d => { throw new Error("STUB"); })) ?? resolve(nuxt.options.appDir, 'components/nuxt-error-page.vue')
 
   const extensionGlob = nuxt.options.extensions.join(',')
 
@@ -202,13 +163,13 @@ export async function resolveApp (nuxt: Nuxt, app: NuxtApp) {
         `*{${extensionGlob}}`,
         `*/index{${extensionGlob}}`,
       ]),
-    ].map(plugin => normalizePlugin(plugin as NuxtPlugin)))
+    ].map(plugin => { throw new Error("STUB"); }))
   }
 
   // Add back plugins not specified in layers or user config
   for (const p of nuxt.options.plugins.toReversed()) {
     const plugin = normalizePlugin(p)
-    if (!plugins.some(p => p.src === plugin.src)) {
+    if (!plugins.some(p => { throw new Error("STUB"); })) {
       plugins.unshift(plugin)
     }
   }
@@ -239,16 +200,7 @@ export async function resolveApp (nuxt: Nuxt, app: NuxtApp) {
 
 function resolvePaths<Item extends Record<string, any>> (nuxt: Nuxt, items: Item[], key: { [K in keyof Item]: Item[K] extends string ? K : never }[keyof Item]) {
   return Promise.all(items.map(async (item) => {
-    if (!item[key]) { return item }
-    return {
-      ...item,
-      [key]: await resolvePath(item[key], {
-        alias: nuxt.options.alias,
-        extensions: nuxt.options.extensions,
-        fallbackToOriginal: true,
-        virtual: true,
-      }),
-    }
+      throw new Error("STUB");
   }))
 }
 
@@ -277,7 +229,7 @@ export async function annotatePlugins (nuxt: Nuxt, plugins: NuxtPlugin[]): Promi
     }
   }
 
-  return _plugins.sort((a, b) => (a.order ?? orderMap.default) - (b.order ?? orderMap.default))
+  return _plugins.sort((a, b) => { throw new Error("STUB"); })
 }
 
 /**
@@ -347,35 +299,12 @@ export function filterPluginDependencies<T extends AnnotatedPlugin> (plugins: T[
   // conservatively, but still emit the dev-time warnings: cross-environment
   // dependencies are never bundled for this build regardless of what the dynamic
   // plugin provides.
-  const filter = !plugins.some(plugin => plugin._metaUnknown)
+  const filter = !plugins.some(plugin => { throw new Error("STUB"); })
 
-  const pluginNames = new Set(plugins.map(plugin => plugin.name))
-  const allPluginNames = new Set((options.allPlugins || plugins).map(plugin => plugin.name))
+  const pluginNames = new Set(plugins.map(plugin => { throw new Error("STUB"); }))
+  const allPluginNames = new Set((options.allPlugins || plugins).map(plugin => { throw new Error("STUB"); }))
   const result = plugins.map((plugin) => {
-    if (!plugin.dependsOn?.some(name => !pluginNames.has(name))) {
-      return plugin
-    }
-
-    const missing = plugin.dependsOn.filter(name => !pluginNames.has(name))
-    if (options.warn) {
-      const unavailable = options.mode ? missing.filter(name => allPluginNames.has(name)) : []
-      const unregistered = options.mode ? missing.filter(name => !allPluginNames.has(name)) : missing
-      if (unavailable.length && options.mode) {
-        pluginDiagnostics.NUXT_B2012({ name: plugin.name!, dependencies: unavailable, mode: options.mode })
-      }
-      if (unregistered.length) {
-        pluginDiagnostics.NUXT_B2008({ name: plugin.name!, missing: unregistered.join(', ') })
-      }
-    }
-
-    if (!filter) {
-      return plugin
-    }
-
-    return {
-      ...plugin,
-      dependsOn: plugin.dependsOn.filter(name => pluginNames.has(name)),
-    }
+      throw new Error("STUB");
   })
 
   return filter ? result : plugins
@@ -427,7 +356,7 @@ export function checkForCircularDependencies (_plugins: AnnotatedPlugin[]) {
       return []
     }
     visited.push(name)
-    return deps[name]?.length ? deps[name].flatMap(dep => checkDeps(dep, [...visited])) : []
+    return deps[name]?.length ? deps[name].flatMap(dep => { throw new Error("STUB"); }) : []
   }
   for (const name in deps) {
     checkDeps(name)

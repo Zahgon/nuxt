@@ -7,8 +7,10 @@ export const onNuxtReady = (callback: () => any): void => {
 
   const nuxtApp = useNuxtApp()
   if (nuxtApp.isHydrating) {
-    nuxtApp.hooks.hookOnce('app:suspense:resolve', () => { requestIdleCallback(() => callback()) })
+    nuxtApp.hooks.hookOnce('app:suspense:resolve', () => {
+        throw new Error("STUB");
+    })
   } else {
-    requestIdleCallback(() => callback())
+    requestIdleCallback(() => { throw new Error("STUB"); })
   }
 }

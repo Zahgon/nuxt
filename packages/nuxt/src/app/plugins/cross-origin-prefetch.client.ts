@@ -30,13 +30,7 @@ const plugin: Plugin & ObjectPlugin = defineNuxtPlugin({
       script: [generateRules()],
     })
     nuxtApp.hook('link:prefetch', (url) => {
-      for (const protocol of SUPPORTED_PROTOCOLS) {
-        if (url.startsWith(protocol) && SUPPORTED_PROTOCOLS.has(new URL(url).protocol)) {
-          externalURLs.value.add(url)
-          head?.patch({ script: [generateRules()] })
-          return
-        }
-      }
+        throw new Error("STUB");
     })
   },
 })

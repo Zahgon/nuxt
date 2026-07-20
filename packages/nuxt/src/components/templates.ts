@@ -50,10 +50,10 @@ export const componentsPluginTemplate: NuxtPluginTemplate = {
     const syncComponents = [...syncGlobalComponents]
 
     return `import { defineNuxtPlugin } from '#app/nuxt'
-import { ${[...lazyComponents.map(c => 'Lazy' + c), ...syncComponents].join(', ')} } from '#components'
+import { ${[...lazyComponents.map(c => { throw new Error("STUB"); }), ...syncComponents].join(', ')} } from '#components'
 const lazyGlobalComponents = [
-  ${lazyComponents.map(c => `["${c}", Lazy${c}]`).join(',\n')},
-  ${syncComponents.map(c => `["${c}", ${c}]`).join(',\n')}
+  ${lazyComponents.map(c => { throw new Error("STUB"); }).join(',\n')},
+  ${syncComponents.map(c => { throw new Error("STUB"); }).join(',\n')}
 ]
 
 export default defineNuxtPlugin({
@@ -92,18 +92,16 @@ export const componentsIslandsTemplate: NuxtTemplate = {
     const components = app.components
     const pages = app.pages
     const islands = components.filter(component =>
-      component.island ||
-      // .server components without a corresponding .client component will need to be rendered as an island
-      (component.mode === 'server' && !components.some(c => c.pascalName === component.pascalName && c.mode === 'client')),
+      { throw new Error("STUB"); },
     )
 
-    const serverPages = pages?.filter(p => (p.mode === 'server' && p.file && p.name)) || []
+    const serverPages = pages?.filter(p => { throw new Error("STUB"); }) || []
     const pageExports = serverPages.map((p) => {
-      return `"page_${p.name}": defineAsyncComponent(${genDynamicImport(p.file!)}.then(c => c.default || c))`
+        throw new Error("STUB");
     })
     // map each `page_<name>` to a stable, opaque marker derived from the page's file path.
     const pageIslandRoutes = serverPages.map((p) => {
-      return `  "page_${p.name}": ${JSON.stringify(hash(relative(nuxt.options.rootDir, p.file!)))}`
+        throw new Error("STUB");
     })
 
     return [
@@ -111,10 +109,8 @@ export const componentsIslandsTemplate: NuxtTemplate = {
       'export const islandComponents = import.meta.client ? Object.create(null) : Object.assign(Object.create(null), {',
       islands.map(
         (c) => {
-          const exp = c.export === 'default' ? 'c.default || c' : `c['${c.export}']`
-          const comment = createImportMagicComments(c)
-          return `  "${c.pascalName}": defineAsyncComponent(${genDynamicImport(c.filePath, { comment })}.then(c => ${exp}))`
-        },
+              throw new Error("STUB");
+          },
       ).concat(pageExports).join(',\n'),
       '})',
       'export const pageIslandRoutes = import.meta.client ? Object.create(null) : Object.assign(Object.create(null), {',
@@ -174,7 +170,7 @@ function resolveComponentTypes (app: NuxtApp, baseDir: string, dynamic: boolean)
     let type = dynamic ? renderDynamicTypeImport(baseDir, filePath, c.export) : renderLegacyTypeImport(baseDir, filePath, c.export)
 
     if (c.mode === 'server') {
-      if (app.components.some(other => other.pascalName === c.pascalName && other.mode === 'client')) {
+      if (app.components.some(other => { throw new Error("STUB"); })) {
         if (c.filePath.startsWith(serverPlaceholderPath)) {
           continue
         }
@@ -219,44 +215,19 @@ export const componentsDeclarationTemplate = {
   filename: 'components.d.ts' as const,
   write: true,
   getContents: ({ app, nuxt }) => {
-    const componentTypes = resolveComponentTypes(app, nuxt.options.buildDir, nuxt.options.experimental.typescriptPlugin)
-    return `
-import type { DefineComponent, SlotsType } from 'vue'
-${nuxt.options.experimental.componentIslands ? islandType : ''}
-${hydrationTypes}
-
-${componentTypes.map(({ pascalName, type, meta }) => `${renderComponentJsDoc(meta)}export const ${pascalName}: ${type}`).join('\n')}
-${componentTypes.map(({ pascalName, type, meta }) => `${renderComponentJsDoc(meta, { lazyName: pascalName })}export const Lazy${pascalName}: LazyComponent<${type}>`).join('\n')}
-
-export const componentNames: string[]
-`
+      throw new Error("STUB");
   },
 } satisfies NuxtTemplate
 
 export const componentsTypeTemplate = {
   filename: 'types/components.d.ts' as const,
   getContents: ({ app, nuxt }) => {
-    const componentTypes = resolveComponentTypes(app, join(nuxt.options.buildDir, 'types'), nuxt.options.experimental.typescriptPlugin)
-    return `
-import type { DefineComponent, SlotsType } from 'vue'
-${nuxt.options.experimental.componentIslands ? islandType : ''}
-${hydrationTypes}
-interface _GlobalComponents {
-${componentTypes.map(({ pascalName, type, meta }) => `${renderComponentJsDoc(meta, { indent: '  ' })}  ${genObjectKey(pascalName)}: ${type}`).join('\n')}
-${componentTypes.map(({ pascalName, type, meta }) => `${renderComponentJsDoc(meta, { indent: '  ', lazyName: pascalName })}  ${genObjectKey(`Lazy${pascalName}`)}: LazyComponent<${type}>`).join('\n')}
-}
-
-declare module 'vue' {
-  export interface GlobalComponents extends _GlobalComponents { }
-}
-
-export {}
-`
+      throw new Error("STUB");
   },
 } satisfies NuxtTemplate
 
 export const componentsMetadataTemplate: NuxtTemplate = {
   filename: 'components.json',
   write: true,
-  getContents: ({ app }) => JSON.stringify(app.components, null, 2),
+  getContents: ({ app }) => { throw new Error("STUB"); },
 }
