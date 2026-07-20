@@ -47,3 +47,6 @@ minimumReleaseAgeExclude:
   - undici@8.5.0
   - unctx@3.0.0
   - magic-string@1.0.0
+  - '@unhead/bundler@3.2.1'
+  - '@unhead/vue@3.2.1'
+  - unhead@3.2.1
